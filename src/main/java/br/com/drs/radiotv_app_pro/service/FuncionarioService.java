@@ -1,7 +1,6 @@
 package br.com.drs.radiotv_app_pro.service;
 
 import br.com.drs.radiotv_app_pro.model.Funcionario;
-import br.com.drs.radiotv_app_pro.model.Usuario;
 import br.com.drs.radiotv_app_pro.model.enuns.TipoPessoa;
 import br.com.drs.radiotv_app_pro.repository.FuncionarioRepository;
 import br.com.drs.radiotv_app_pro.util.ValidaDocumentoUtil;
@@ -38,10 +37,7 @@ public class FuncionarioService {
         if (funcionarioRepository.existsByEmail(funcionario.getEmail())) {
             throw new IllegalArgumentException("E-mail já cadastrado.");
         }
-
         preencherEnderecoPorCep(funcionario);
-
-
         if (funcionario.getTipoPessoa() == TipoPessoa.FISICA) {
             if (ValidaDocumentoUtil.isCPF(funcionario.getCpf())) {
                 throw new IllegalArgumentException("CPF inválido por favor tente de novo.");
