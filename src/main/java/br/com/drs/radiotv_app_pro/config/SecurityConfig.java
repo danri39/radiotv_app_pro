@@ -44,6 +44,11 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/vendedor/**").permitAll()
                         .requestMatchers("/api/v1/cliente/**").permitAll()
                         .requestMatchers("/api/v1/agencia/**").permitAll()
+                        .requestMatchers("/api/v1/contrato/**").permitAll()
+                        .requestMatchers("/api/v1/contratoMidia/**").permitAll()
+                        .requestMatchers("/api/v1/contratoPagamento/**").permitAll()
+                        .requestMatchers("/api/v1/programa/**").permitAll()
+                        .requestMatchers("/api/v1/ramoAtividade/**").permitAll()
 
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
