@@ -81,22 +81,12 @@ public class UsuarioService {
         Usuario usuarioExistente = usuarioRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado com o ID: " + id));
 
-        // Guarda o hash antigo seguro antes do mapeamento limpar os dados
-        String senhaCriptografadaAtual = usuarioExistente.getSenha();
-
-        // Mescla todas as alterações enviadas da tela (Papel, Acesso, Setores, funcionarioId, etc.)
         usuarioMapper.updateEntityFromDto(dto, usuarioExistente);
 
-        // Tratamento Condicional Seguro da Senha
-        if (dto.getSenha() != null && !dto.getSenha().trim().isEmpty()) {
-            // Se o Administrador redefiniu algo na tela, aplica a nova criptografia BCrypt
-            usuarioExistente.setSenha(passwordEncoder.encode(dto.getSenha()));
-        } else {
-            // Se veio em branco do React, resguarda e reatribui a senha original inalterada
-            usuarioExistente.setSenha(senhaCriptografadaAtual);
-        }
+        usuarioExistente.setUsuarioId(id);
 
-        return usuarioMapper.toDto(usuarioRepository.save(usuarioExistente));
+        Usuario salvo = usuarioRepository.save(usuarioExistente);
+        return usuarioMapper.toDto(salvo);
     }
 
     @Transactional
