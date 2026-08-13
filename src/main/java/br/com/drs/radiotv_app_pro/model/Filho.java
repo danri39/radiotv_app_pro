@@ -1,5 +1,6 @@
 package br.com.drs.radiotv_app_pro.model;
 
+import br.com.drs.radiotv_app_pro.model.enuns.Formacao;
 import br.com.drs.radiotv_app_pro.model.enuns.Sexo;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
@@ -44,6 +45,9 @@ public class Filho {
 
     @Enumerated(EnumType.STRING)
     private Sexo sexo;
+
+    @Enumerated(EnumType.STRING)
+    private Formacao formacao;
 
     @Builder.Default
     private Boolean ativo = true;
