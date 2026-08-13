@@ -3,6 +3,7 @@ package br.com.drs.radiotv_app_pro.service;
 import br.com.drs.radiotv_app_pro.dto.ClienteDTO;
 import br.com.drs.radiotv_app_pro.mapper.ClienteMapper;
 import br.com.drs.radiotv_app_pro.model.Cliente;
+import br.com.drs.radiotv_app_pro.model.enuns.TipoPessoa;
 import br.com.drs.radiotv_app_pro.repository.ClienteRepository;
 import br.com.drs.radiotv_app_pro.util.ValidaDocumentoUtil;
 import lombok.RequiredArgsConstructor;
@@ -23,16 +24,25 @@ public class ClienteService {
 
     @Transactional
     public ClienteDTO salvar(ClienteDTO dto) {
-        if(!ValidaDocumentoUtil.isCPF(dto.getCpf())) {
-            throw new IllegalArgumentException("CPF inválido favor acertar.");
-        } else {
-            if(ValidaDocumentoUtil.isCNPJ(dto.getCnpj())) {
+        // Validação condicional com base no Tipo de Pessoa
+        if (dto.getTipoPessoa() == TipoPessoa.FISICA) {
+            if (!ValidaDocumentoUtil.isCPF(dto.getCpf())) {
+                throw new IllegalArgumentException("CPF inválido favor acertar.");
+            }
+            dto.setCnpj(null);
+            dto.setInscricao(null);
+        } else if (dto.getTipoPessoa() == TipoPessoa.JURIDICA) {
+            if (!ValidaDocumentoUtil.isCNPJ(dto.getCnpj())) {
                 throw new IllegalArgumentException("CNPJ inválido favor acertar.");
             }
-            Cliente entity = mapper.toEntity(dto);
-            repository.save(entity);
-            return mapper.toDTO(entity);
+            dto.setCpf(null);
+            dto.setRg(null);
         }
+
+        Cliente entity = mapper.toEntity(dto);
+        buscarCepEPreencherEndereco(entity);
+        repository.save(entity);
+        return mapper.toDTO(entity);
     }
 
     public List<ClienteDTO> listarTodos() {
@@ -52,11 +62,20 @@ public class ClienteService {
         Cliente clienteExistente = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cliente não encontrado com o ID: " + id));
 
-        if(!ValidaDocumentoUtil.isCPF(dto.getCpf())) {
-            throw new IllegalArgumentException("CPF inválido favor acertar.");
-        } else if (ValidaDocumentoUtil.isCNPJ(dto.getCnpj())) {
-            throw new IllegalArgumentException("CNPJ inválido favor acertar.");
+        if (dto.getTipoPessoa() == TipoPessoa.FISICA) {
+            if (!ValidaDocumentoUtil.isCPF(dto.getCpf())) {
+                throw new IllegalArgumentException("CPF inválido favor acertar.");
+            }
+            dto.setCnpj(null);
+            dto.setInscricao(null);
+        } else if (dto.getTipoPessoa() == TipoPessoa.JURIDICA) {
+            if (!ValidaDocumentoUtil.isCNPJ(dto.getCnpj())) {
+                throw new IllegalArgumentException("CNPJ inválido favor acertar.");
+            }
+            dto.setCpf(null);
+            dto.setRg(null);
         }
+
         mapper.updateEntityFromDto(dto, clienteExistente);
         buscarCepEPreencherEndereco(clienteExistente);
         return mapper.toDTO(repository.save(clienteExistente));
