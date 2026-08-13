@@ -37,6 +37,7 @@ public class SecurityConfig {
 
                         .requestMatchers(HttpMethod.POST, "/api/v1/usuario/public/**").permitAll()
                         .requestMatchers("/api/v1/usuario/public/**").permitAll()
+                        .requestMatchers("/api/v1/usuario/**").permitAll()
                         .requestMatchers("/api/v1/funcionario/**").permitAll()
                         .requestMatchers("/api/v1/familia/**").permitAll()
                         .requestMatchers("/api/v1/filho/**").permitAll()
@@ -48,6 +49,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/contratoPagamento/**").permitAll()
                         .requestMatchers("/api/v1/programa/**").permitAll()
                         .requestMatchers("/api/v1/ramoAtividade/**").permitAll()
+                        .requestMatchers("/api/v1/configEscritorio/**").permitAll()
 
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
