@@ -3,7 +3,6 @@ package br.com.drs.radiotv_app_pro.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -36,9 +35,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
 
                         .requestMatchers("/api/v1/usuario/public/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/usuario/public/login").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/usuario/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/usuario/nome/**").permitAll()
                         .requestMatchers("/api/v1/funcionario/**").permitAll()
                         .requestMatchers("/api/v1/familia/**").permitAll()
                         .requestMatchers("/api/v1/vendedor/**").permitAll()
