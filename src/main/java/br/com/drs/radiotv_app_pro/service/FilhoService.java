@@ -6,7 +6,6 @@ import br.com.drs.radiotv_app_pro.model.Filho;
 import br.com.drs.radiotv_app_pro.model.Funcionario;
 import br.com.drs.radiotv_app_pro.repository.FilhoRepository;
 import br.com.drs.radiotv_app_pro.repository.FuncionarioRepository;
-import br.com.drs.radiotv_app_pro.util.ValidaDocumentoUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,10 +49,6 @@ public class FilhoService {
         }
         if (dto.getNome() == null || dto.getNome().isBlank()) {
             throw new IllegalArgumentException("O nome do filho(a) é obrigatório.");
-        }
-
-        if(!ValidaDocumentoUtil.isCPF(dto.getNome())) {
-            throw new IllegalArgumentException("CPF inválido por favor acertar.");
         }
 
         Funcionario funcionario = funcionarioRepository.findById(dto.getFuncionarioId())
