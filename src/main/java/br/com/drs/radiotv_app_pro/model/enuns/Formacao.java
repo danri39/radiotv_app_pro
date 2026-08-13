@@ -13,7 +13,8 @@ public enum Formacao {
     POSGRADUACAO("Pós Graduação"),
     MESTRADO("Mestrado"),
     DOUTORADO("Doutorado"),
-    POSDOUTORADO("Pós Doutorado");
+    POSDOUTORADO("Pós Doutorado"),
+    NAOINFORMADO("Não Informado");
 
     private String descricao;
 }

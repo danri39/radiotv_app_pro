@@ -51,7 +51,7 @@ public class FamiliaService {
         if (dto.getNome() == null || dto.getNome().isBlank()) {
             throw new IllegalArgumentException("O nome do familiar é obrigatório.");
         }
-        if(ValidaDocumentoUtil.isCPF(dto.getCpf())) {
+        if(!ValidaDocumentoUtil.isCPF(dto.getCpf())) {
             throw new IllegalArgumentException("CPF inválido favor acertar.");
         }
 
@@ -74,7 +74,7 @@ public class FamiliaService {
         familiaMapper.updateEntityFromDto(dto, familiaExistente);
 
         if (dto.getCpf() != null) {
-            familiaExistente.setCpf(String.valueOf(ValidaDocumentoUtil.isCPF(dto.getCpf())));
+            familiaExistente.setCpf(String.valueOf(!ValidaDocumentoUtil.isCPF(dto.getCpf())));
         }
 
         return familiaMapper.toDTO(familiaRepository.save(familiaExistente));

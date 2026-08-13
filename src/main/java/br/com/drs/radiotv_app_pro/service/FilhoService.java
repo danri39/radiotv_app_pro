@@ -52,7 +52,7 @@ public class FilhoService {
             throw new IllegalArgumentException("O nome do filho(a) é obrigatório.");
         }
 
-        if(ValidaDocumentoUtil.isCPF(dto.getNome())) {
+        if(!ValidaDocumentoUtil.isCPF(dto.getNome())) {
             throw new IllegalArgumentException("CPF inválido por favor acertar.");
         }
 

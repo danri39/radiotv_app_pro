@@ -39,7 +39,7 @@ public class FuncionarioService {
         }
         preencherEnderecoPorCep(funcionario);
         if (funcionario.getTipoPessoa() == TipoPessoa.FISICA) {
-            if (ValidaDocumentoUtil.isCPF(funcionario.getCpf())) {
+            if (!ValidaDocumentoUtil.isCPF(funcionario.getCpf())) {
                 throw new IllegalArgumentException("CPF inválido por favor tente de novo.");
             }
             if (funcionarioRepository.existsByCpf(funcionario.getCpf())) {
@@ -48,7 +48,7 @@ public class FuncionarioService {
             funcionario.setCnpj(null);
             funcionario.setInscricao(null);
         } else if (funcionario.getTipoPessoa() == TipoPessoa.JURIDICA) {
-            if (ValidaDocumentoUtil.isCNPJ(funcionario.getCnpj())) {
+            if (!ValidaDocumentoUtil.isCNPJ(funcionario.getCnpj())) {
                 throw new IllegalArgumentException("CNPJ inválido por favor tente de novo.");
             }
             if (funcionarioRepository.existsByCnpj(funcionario.getCnpj())) {
