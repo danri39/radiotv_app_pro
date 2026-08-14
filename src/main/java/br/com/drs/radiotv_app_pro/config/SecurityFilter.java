@@ -1,6 +1,6 @@
 package br.com.drs.radiotv_app_pro.config;
 
-import br.com.drs.radiotv_app_pro.service.CustomUserDetailsService;
+import br.com.drs.radiotv_app_pro.service.escritorio.CustomUserDetailsService;
 import br.com.drs.radiotv_app_pro.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
