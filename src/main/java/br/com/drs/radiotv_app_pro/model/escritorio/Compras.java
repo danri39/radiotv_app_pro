@@ -22,16 +22,16 @@ public class Compras {
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
-    @JoinColumn(nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "funcionario_id", nullable = false)
     private Funcionario funcionario;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "produtos_id", nullable = false)
+    private Produto produtos;
 
     @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate dataCompra;
-
-    @OneToOne
-    @JoinColumn(nullable = false)
-    private Produto produtos;
 
     private int quantidade;
 

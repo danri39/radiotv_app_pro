@@ -3,7 +3,11 @@ package br.com.drs.radiotv_app_pro.service.escritorio;
 import br.com.drs.radiotv_app_pro.dto.escritorio.ComprasDTO;
 import br.com.drs.radiotv_app_pro.mapper.escritorio.ComprasMapper;
 import br.com.drs.radiotv_app_pro.model.escritorio.Compras;
+import br.com.drs.radiotv_app_pro.model.escritorio.Funcionario;
+import br.com.drs.radiotv_app_pro.model.escritorio.Produto;
 import br.com.drs.radiotv_app_pro.repository.escritorio.ComprasRepository;
+import br.com.drs.radiotv_app_pro.repository.escritorio.FuncionarioRepository;
+import br.com.drs.radiotv_app_pro.repository.escritorio.ProdutoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,12 +19,30 @@ import java.util.List;
 public class ComprasService {
 
     private final ComprasRepository repository;
-
     private final ComprasMapper mapper;
+    private final ProdutoRepository produtoRepository;
+    private final FuncionarioRepository funcionarioRepository;
 
     @Transactional
     public ComprasDTO salvar(ComprasDTO dto) {
-        Compras entidade = mapper.toEntity(dto);
+        // Busca direta pelo ID que vem do Front-end
+        Funcionario funcionario = funcionarioRepository.findById(dto.getFuncionarioId())
+                .orElseThrow(() -> new RuntimeException("Funcionário não encontrado ID: " + dto.getFuncionarioId()));
+
+        Produto produto = produtoRepository.findById(dto.getProdutoId())
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado ID: " + dto.getProdutoId()));
+
+        Compras entidade = new Compras();
+        // IMPORTANTE: Não setar o ID manualmente, deixe o @GeneratedValue do JPA trabalhar!
+        entidade.setFuncionario(funcionario);
+        entidade.setProdutos(produto);
+        entidade.setQuantidade(dto.getQuantidade());
+        entidade.setValorCompra(dto.getValorCompra());
+        entidade.setValorTotal(dto.getValorTotal());
+        entidade.setDataCompra(dto.getDataCompra());
+        entidade.setAtiva(true);
+        entidade.setCompraAceita(false);
+
         return mapper.toDTO(repository.save(entidade));
     }
 
