@@ -7,6 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum Status {
 
+    LANCADO("Lançado"),
     PAGO("Pago"),
     ATRASADO("Atrasado"),
     NEGATIVADO("Vencido"),

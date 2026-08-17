@@ -36,6 +36,7 @@ public class Pagamento {
     private BigDecimal valorPagamentoEfetivo;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
     private Status status;
 
     @Builder.Default

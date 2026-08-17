@@ -59,6 +59,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/ferias/**").permitAll()
                         .requestMatchers("/api/v1/folhasPagamento/**").permitAll()
                         .requestMatchers("/api/v1/horarioBreak/**").permitAll()
+                        .requestMatchers("/api/v1/pagamento/**").permitAll()
 
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
