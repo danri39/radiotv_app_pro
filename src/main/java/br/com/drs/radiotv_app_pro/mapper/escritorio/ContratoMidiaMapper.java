@@ -12,7 +12,7 @@ public interface ContratoMidiaMapper {
     @Mapping(source = "contrato.id", target = "contratoId")
     @Mapping(source = "programa.id", target = "programaId")
     @Mapping(source = "ramoAtividade.id", target = "ramoAtividadeId")
-    @Mapping(source = "audiosPool", target = "audiosPool") // Força o mapeamento do pool de áudios
+    @Mapping(source = "audiosPool", target = "audiosPool")
     ContratoMidiaDTO toDTO(ContratoMidia entidade);
 
     @Mapping(source = "contratoId", target = "contrato.id")

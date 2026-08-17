@@ -36,7 +36,7 @@ public class ContratoMidia {
 
     private String identificacao;
 
-    private int quantidade; // Representa as inserções totais por dia
+    private int quantidade;
 
     @Enumerated(EnumType.STRING)
     private TempoMidia tempoMidia;

@@ -1,10 +1,13 @@
 package br.com.drs.radiotv_app_pro.model.escritorio;
 
+import br.com.drs.radiotv_app_pro.model.enuns.DiasSemana;
+import br.com.drs.radiotv_app_pro.model.enuns.TipoPrograma;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -26,6 +29,15 @@ public class Programa {
 
     @JsonFormat(pattern = "HH:mm:ss")
     private LocalTime horaFinal;
+
+    @ElementCollection(targetClass = DiasSemana.class)
+    @Enumerated(EnumType.STRING)
+    @CollectionTable(name = "programa_semana", joinColumns = @JoinColumn(name = "programa_id"))
+    @Column(name = "dia_semana")
+    private List<DiasSemana> diasSemana;
+
+    @Enumerated(EnumType.STRING)
+    private TipoPrograma tipoPrograma;
 
     private Boolean feriados;
 

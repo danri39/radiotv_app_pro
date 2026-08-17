@@ -1,6 +1,11 @@
 package br.com.drs.radiotv_app_pro.dto.escritorio;
 
+import br.com.drs.radiotv_app_pro.model.enuns.DiasSemana;
+import br.com.drs.radiotv_app_pro.model.enuns.Distribuicao;
+import br.com.drs.radiotv_app_pro.model.enuns.TempoMidia;
+import br.com.drs.radiotv_app_pro.model.enuns.TipoMidia;
 import br.com.drs.radiotv_app_pro.model.escritorio.ContratoMidiaAudioPool;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,35 +23,37 @@ public class ContratoMidiaDTO {
 
     private Long id;
 
-    private Long contratoId;       // TEM QUE ESTAR EXATAMENTE ASSIM
+    private Long contratoId;
 
-    private String tipoMidia;
+    private TipoMidia tipoMidia;
 
     private String identificacao;
 
     private int quantidade;
 
-    private String tempoMidia;
+    private TempoMidia tempoMidia;
 
-    private List<String> diasSemana;
+    private List<DiasSemana> diasSemana;
 
-    private String distribuicao;
+    private Distribuicao distribuicao;
 
     private LocalTime horarioEspecifico;
 
-    private Long programaId;       // TEM QUE ESTAR EXATAMENTE ASSIM
+    private Long programaId;
 
-    private Long ramoAtividadeId;  // TEM QUE ESTAR EXATAMENTE ASSIM
+    private Long ramoAtividadeId;
 
     private Integer prioridade;
 
+    @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate dataInicio;
 
+    @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate dataFinal;
 
     private Boolean ativo;
 
-    private Boolean temMultiplosAudios;
+    private Boolean temMultiplosAudios = false;
 
     private List<ContratoMidiaAudioPool> audiosPool;
 }
