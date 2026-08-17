@@ -6,13 +6,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/contratoPagamento")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*") // Liberado para o seu React consumir sem bloqueios de CORS
+@CrossOrigin(origins = "*")
 public class ContratoPagamentoController {
 
     private final ContratoPagamentoService service;
@@ -43,15 +42,18 @@ public class ContratoPagamentoController {
         return ResponseEntity.noContent().build();
     }
 
-    // AÇÃO EXCLUSIVA: Executa o faturamento da parcela
     @PutMapping("/{id}/faturar")
     public ResponseEntity<ContratoPagamentoDTO> faturar(@PathVariable Long id) {
         return ResponseEntity.ok(service.faturarParcela(id));
     }
 
-    // AÇÃO EXCLUSIVA: Executa a baixa de pagamento da parcela
     @PutMapping("/{id}/baixar")
     public ResponseEntity<ContratoPagamentoDTO> baixar(@PathVariable Long id) {
         return ResponseEntity.ok(service.baixarParcela(id));
+    }
+
+    @PutMapping("/{id}/estornar")
+    public ResponseEntity<ContratoPagamentoDTO> estornar(@PathVariable Long id) {
+        return ResponseEntity.ok(service.estornarParcela(id));
     }
 }

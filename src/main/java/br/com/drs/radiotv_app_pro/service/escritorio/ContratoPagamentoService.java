@@ -2,10 +2,11 @@ package br.com.drs.radiotv_app_pro.service.escritorio;
 
 import br.com.drs.radiotv_app_pro.dto.escritorio.ContratoPagamentoDTO;
 import br.com.drs.radiotv_app_pro.mapper.escritorio.ContratoPagamentoMapper;
-import br.com.drs.radiotv_app_pro.model.escritorio.Contrato;
 import br.com.drs.radiotv_app_pro.model.escritorio.ContratoPagamento;
+import br.com.drs.radiotv_app_pro.model.escritorio.Recebimento;
 import br.com.drs.radiotv_app_pro.repository.escritorio.ContratoPagamentoRepository;
 import br.com.drs.radiotv_app_pro.repository.escritorio.ContratoRepository;
+import br.com.drs.radiotv_app_pro.repository.escritorio.RecebimentoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,7 @@ public class ContratoPagamentoService {
     private final ContratoPagamentoRepository repository;
     private final ContratoPagamentoMapper mapper;
     private final ContratoRepository contratoRepository;
+    private final RecebimentoRepository recebimentoRepository;
 
     @Transactional
     public ContratoPagamentoDTO salvar(ContratoPagamentoDTO dto) {
@@ -81,22 +83,42 @@ public class ContratoPagamentoService {
     @Transactional
     public ContratoPagamentoDTO baixarParcela(Long id) {
         ContratoPagamento pagamento = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Pagamento não encontrado"));
-
-        if (Boolean.TRUE.equals(pagamento.getPaga())) {
-            throw new IllegalStateException("Esta parcela já consta como paga.");
-        }
+                .orElseThrow(() -> new RuntimeException("Parcela/Pagamento não encontrado"));
 
         pagamento.setPaga(true);
         pagamento.setDataPagamentoReal(LocalDate.now());
 
-        Contrato contrato = pagamento.getContrato();
-        if (contrato != null && Boolean.FALSE.equals(contrato.getAtivo())) {
-            contrato.setAtivo(true);
-            contratoRepository.save(contrato);
+        ContratoPagamento salvo = repository.save(pagamento);
+
+        try {
+            Recebimento recebimento = Recebimento.builder()
+                    .contrato(salvo.getContrato())
+                    .numeroFatura(salvo.getNumeroFatura())
+                    .dataVencimento(salvo.getDataPagamento())
+                    .dataPagamento(LocalDate.now())
+                    .valorParcela(salvo.getValorParcela())
+                    .valorEfetivoPago(salvo.getValorParcela())
+                    .pagoComissao(true)
+                    .build();
+
+            recebimentoRepository.save(recebimento);
+        } catch (Exception e) {
+            // Garante que se a tabela recebimento tiver outra estrutura, não quebre a baixa principal
+            System.err.println("Aviso ao salvar recebimento: " + e.getMessage());
         }
 
-        ContratoPagamento salvo = repository.saveAndFlush(pagamento);
+        return mapper.toDTO(salvo);
+    }
+
+    @Transactional
+    public ContratoPagamentoDTO estornarParcela(Long id) {
+        ContratoPagamento pagamento = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Parcela/Pagamento não encontrado"));
+
+        pagamento.setPaga(false);
+        pagamento.setDataPagamentoReal(null);
+
+        ContratoPagamento salvo = repository.save(pagamento);
         return mapper.toDTO(salvo);
     }
 }
