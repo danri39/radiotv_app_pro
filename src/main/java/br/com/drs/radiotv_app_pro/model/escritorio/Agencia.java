@@ -31,10 +31,10 @@ public class Agencia {
     @Column(nullable = false, length = 20)
     private TipoPessoa tipoPessoa;
 
-    @Column(unique = true, length = 14)
+    @Column(unique = true, length = 18)
     private String cpf;
 
-    @Column(unique = true, length = 14)
+    @Column(unique = true, length = 18)
     private String cnpj;
 
     @Column(length = 20)

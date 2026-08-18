@@ -65,7 +65,27 @@ public class FilhoService {
     public FilhoDTO atualizar(Long id, FilhoDTO dto) {
         Filho filhoExistente = filhoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Filho(a) não encontrado para atualização."));
-        filhoMapper.updateEntityFromDto(dto, filhoExistente);
+
+        // Atualiza campos de texto e atributos básicos com segurança
+        filhoExistente.setNome(dto.getNome());
+        filhoExistente.setCpf(dto.getCpf());
+        filhoExistente.setRg(dto.getRg());
+        filhoExistente.setTelefone(dto.getTelefone());
+        filhoExistente.setCelular(dto.getCelular());
+        filhoExistente.setDataNascimento(dto.getDataNascimento());
+        filhoExistente.setSexo(dto.getSexo());
+        filhoExistente.setFormacao(dto.getFormacao());
+        if (dto.getAtivo() != null) {
+            filhoExistente.setAtivo(dto.getAtivo());
+        }
+
+        // Atualiza o vínculo do funcionário apenas se foi informado e alterado
+        if (dto.getFuncionarioId() != null &&
+                (filhoExistente.getFuncionario() == null || !filhoExistente.getFuncionario().getId().equals(dto.getFuncionarioId()))) {
+            Funcionario funcionario = funcionarioRepository.findById(dto.getFuncionarioId())
+                    .orElseThrow(() -> new IllegalArgumentException("Funcionário não encontrado com o ID: " + dto.getFuncionarioId()));
+            filhoExistente.setFuncionario(funcionario);
+        }
 
         return filhoMapper.toDTO(filhoRepository.save(filhoExistente));
     }

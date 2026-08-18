@@ -37,6 +37,7 @@ public class ValidaDocumentoUtil {
     public static boolean isCNPJ(String cnpj) {
         if (cnpj == null) return false;
 
+        // Remove tudo o que não for letra ou dígito (pontos, barras, traços, espaços)
         cnpj = cnpj.replaceAll("[^a-zA-Z0-9]", "").toUpperCase();
 
         if (cnpj.length() != 14) {

@@ -71,10 +71,32 @@ public class FamiliaService {
         Familia familiaExistente = familiaRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Membro da família não encontrado."));
 
-        familiaMapper.updateEntityFromDto(dto, familiaExistente);
+        // Valida o CPF se ele foi alterado/informado
+        if (dto.getCpf() != null && !dto.getCpf().isBlank()) {
+            if (!ValidaDocumentoUtil.isCPF(dto.getCpf())) {
+                throw new IllegalArgumentException("CPF inválido favor acertar.");
+            }
+            familiaExistente.setCpf(dto.getCpf());
+        }
 
-        if (dto.getCpf() != null) {
-            familiaExistente.setCpf(String.valueOf(!ValidaDocumentoUtil.isCPF(dto.getCpf())));
+        // Atualiza os campos básicos permitidos
+        familiaExistente.setNome(dto.getNome());
+        familiaExistente.setRg(dto.getRg());
+        familiaExistente.setTelefone(dto.getTelefone());
+        familiaExistente.setCelular(dto.getCelular());
+        familiaExistente.setDataNascimento(dto.getDataNascimento());
+        familiaExistente.setSexo(dto.getSexo());
+        familiaExistente.setFormacao(dto.getFormacao());
+        if (dto.getAtivo() != null) {
+            familiaExistente.setAtivo(dto.getAtivo());
+        }
+
+        // Se o funcionário foi alterado no DTO, atualiza o vínculo com segurança
+        if (dto.getFuncionarioId() != null &&
+                (familiaExistente.getFuncionario() == null || !familiaExistente.getFuncionario().getId().equals(dto.getFuncionarioId()))) {
+            Funcionario novoFuncionario = funcionarioRepository.findById(dto.getFuncionarioId())
+                    .orElseThrow(() -> new IllegalArgumentException("Funcionário não encontrado com o ID fornecido."));
+            familiaExistente.setFuncionario(novoFuncionario);
         }
 
         return familiaMapper.toDTO(familiaRepository.save(familiaExistente));
