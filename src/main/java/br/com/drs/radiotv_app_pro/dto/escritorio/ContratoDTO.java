@@ -34,6 +34,12 @@ public class ContratoDTO {
 
     private Integer quantidadeParcelas;
 
+    @JsonFormat(pattern = "dd/MM/yyyy")
+    private LocalDate dataPrimeiroPagamento;
+
+    @Builder.Default
+    private Boolean contratoBonificado = false;
+
     private List<ContratoMidiaDTO> midias;
 
     private List<ContratoPagamentoDTO> pagamentos;

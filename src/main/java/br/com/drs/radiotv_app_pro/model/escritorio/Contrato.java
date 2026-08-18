@@ -46,6 +46,12 @@ public class Contrato {
 
     private Integer quantidadeParcelas;
 
+    @JsonFormat(pattern = "dd/MM/yyyy")
+    private LocalDate dataPrimeiroPagamento;
+
+    @Builder.Default
+    private Boolean contratoBonificado = false;
+
     @Builder.Default
     @OneToMany(mappedBy = "contrato", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ContratoMidia> midias = new ArrayList<>();
