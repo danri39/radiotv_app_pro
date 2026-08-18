@@ -68,16 +68,35 @@ public class ContratoService {
         Contrato contratoExistente = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Contrato não encontrado"));
 
-        mapper.updateEntityFromDto(dto, contratoExistente);
+        // Atualiza os campos básicos
+        contratoExistente.setDataInicio(dto.getDataInicio());
+        contratoExistente.setDataFinal(dto.getDataFinal());
+        contratoExistente.setValorTotal(dto.getValorTotal());
+        contratoExistente.setQuantidadeParcelas(dto.getQuantidadeParcelas());
+        contratoExistente.setDataPrimeiroPagamento(dto.getDataPrimeiroPagamento());
 
-        Cliente cliente = clienteRepository.findById(dto.getClienteId())
-                .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado."));
-        contratoExistente.setCliente(cliente);
+        if (dto.getContratoBonificado() != null) {
+            contratoExistente.setContratoBonificado(dto.getContratoBonificado());
+        }
+        if (dto.getAtivo() != null) {
+            contratoExistente.setAtivo(dto.getAtivo());
+        }
 
-        Vendedor vendedor = vendedorRepository.findById(dto.getVendedorId())
-                .orElseThrow(() -> new IllegalArgumentException("Vendedor não encontrado."));
-        contratoExistente.setVendedor(vendedor);
+        // Atualiza o Cliente com segurança
+        if (dto.getClienteId() != null) {
+            Cliente cliente = clienteRepository.findById(dto.getClienteId())
+                    .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado."));
+            contratoExistente.setCliente(cliente);
+        }
 
+        // Atualiza o Vendedor com segurança
+        if (dto.getVendedorId() != null) {
+            Vendedor vendedor = vendedorRepository.findById(dto.getVendedorId())
+                    .orElseThrow(() -> new IllegalArgumentException("Vendedor não encontrado."));
+            contratoExistente.setVendedor(vendedor);
+        }
+
+        // Atualiza a Agência com segurança (pode ser nula)
         if (dto.getAgenciaId() != null) {
             Agencia agencia = agenciaRepository.findById(dto.getAgenciaId())
                     .orElseThrow(() -> new IllegalArgumentException("Agência não cadastrada no sistema."));
