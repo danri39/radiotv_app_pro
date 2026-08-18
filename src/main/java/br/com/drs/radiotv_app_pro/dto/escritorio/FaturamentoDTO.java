@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ContratoPagamentoDTO {
+public class FaturamentoDTO {
 
     private Long id;
 

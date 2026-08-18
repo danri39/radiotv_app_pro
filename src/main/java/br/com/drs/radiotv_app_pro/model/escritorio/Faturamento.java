@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @Builder
 @Entity
 @Table(name = "contrato_pagamento")
-public class ContratoPagamento {
+public class Faturamento {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

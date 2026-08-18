@@ -1,10 +1,10 @@
 package br.com.drs.radiotv_app_pro.service.escritorio;
 
-import br.com.drs.radiotv_app_pro.dto.escritorio.ContratoPagamentoDTO;
-import br.com.drs.radiotv_app_pro.mapper.escritorio.ContratoPagamentoMapper;
-import br.com.drs.radiotv_app_pro.model.escritorio.ContratoPagamento;
+import br.com.drs.radiotv_app_pro.dto.escritorio.FaturamentoDTO;
+import br.com.drs.radiotv_app_pro.mapper.escritorio.FaturamentoMapper;
+import br.com.drs.radiotv_app_pro.model.escritorio.Faturamento;
 import br.com.drs.radiotv_app_pro.model.escritorio.Recebimento;
-import br.com.drs.radiotv_app_pro.repository.escritorio.ContratoPagamentoRepository;
+import br.com.drs.radiotv_app_pro.repository.escritorio.FaturamentoRepository;
 import br.com.drs.radiotv_app_pro.repository.escritorio.ContratoRepository;
 import br.com.drs.radiotv_app_pro.repository.escritorio.RecebimentoRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,34 +17,34 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class ContratoPagamentoService {
+public class FaturamentoService {
 
-    private final ContratoPagamentoRepository repository;
-    private final ContratoPagamentoMapper mapper;
+    private final FaturamentoRepository repository;
+    private final FaturamentoMapper mapper;
     private final ContratoRepository contratoRepository;
     private final RecebimentoRepository recebimentoRepository;
 
     @Transactional
-    public ContratoPagamentoDTO salvar(ContratoPagamentoDTO dto) {
-        ContratoPagamento entidade = mapper.toEntity(dto);
+    public FaturamentoDTO salvar(FaturamentoDTO dto) {
+        Faturamento entidade = mapper.toEntity(dto);
         return mapper.toDTO(repository.save(entidade));
     }
 
-    public List<ContratoPagamentoDTO> listarTodos() {
+    public List<FaturamentoDTO> listarTodos() {
         return repository.findAll().stream()
                 .map(mapper::toDTO)
                 .toList();
     }
 
-    public ContratoPagamentoDTO buscarPorId(Long id) {
-        ContratoPagamento pagamento = repository.findById(id)
+    public FaturamentoDTO buscarPorId(Long id) {
+        Faturamento pagamento = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Pagamento não encontrado"));
         return mapper.toDTO(pagamento);
     }
 
     @Transactional
-    public ContratoPagamentoDTO atualizar(Long id, ContratoPagamentoDTO dto) {
-        ContratoPagamento pagamentoExistente = repository.findById(id)
+    public FaturamentoDTO atualizar(Long id, FaturamentoDTO dto) {
+        Faturamento pagamentoExistente = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Pagamento não encontrado"));
 
         mapper.updateEntityFromDto(dto, pagamentoExistente);
@@ -61,8 +61,8 @@ public class ContratoPagamentoService {
     }
 
     @Transactional
-    public ContratoPagamentoDTO faturarParcela(Long id) {
-        ContratoPagamento pagamento = repository.findById(id)
+    public FaturamentoDTO faturarParcela(Long id) {
+        Faturamento pagamento = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Pagamento não encontrado"));
 
         if (Boolean.TRUE.equals(pagamento.getFaturado())) {
@@ -76,19 +76,19 @@ public class ContratoPagamentoService {
         pagamento.setNumeroFatura(codigoFatura);
 
         // Salva e força a persistência imediata no banco antes de passar pelo Mapper
-        ContratoPagamento salvo = repository.saveAndFlush(pagamento);
+        Faturamento salvo = repository.saveAndFlush(pagamento);
         return mapper.toDTO(salvo);
     }
 
     @Transactional
-    public ContratoPagamentoDTO baixarParcela(Long id) {
-        ContratoPagamento pagamento = repository.findById(id)
+    public FaturamentoDTO baixarParcela(Long id) {
+        Faturamento pagamento = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Parcela/Pagamento não encontrado"));
 
         pagamento.setPaga(true);
         pagamento.setDataPagamentoReal(LocalDate.now());
 
-        ContratoPagamento salvo = repository.save(pagamento);
+        Faturamento salvo = repository.save(pagamento);
 
         try {
             Recebimento recebimento = Recebimento.builder()
@@ -111,14 +111,14 @@ public class ContratoPagamentoService {
     }
 
     @Transactional
-    public ContratoPagamentoDTO estornarParcela(Long id) {
-        ContratoPagamento pagamento = repository.findById(id)
+    public FaturamentoDTO estornarParcela(Long id) {
+        Faturamento pagamento = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Parcela/Pagamento não encontrado"));
 
         pagamento.setPaga(false);
         pagamento.setDataPagamentoReal(null);
 
-        ContratoPagamento salvo = repository.save(pagamento);
+        Faturamento salvo = repository.save(pagamento);
         return mapper.toDTO(salvo);
     }
 }

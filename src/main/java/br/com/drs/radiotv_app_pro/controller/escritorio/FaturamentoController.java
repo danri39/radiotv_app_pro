@@ -1,7 +1,7 @@
 package br.com.drs.radiotv_app_pro.controller.escritorio;
 
-import br.com.drs.radiotv_app_pro.dto.escritorio.ContratoPagamentoDTO;
-import br.com.drs.radiotv_app_pro.service.escritorio.ContratoPagamentoService;
+import br.com.drs.radiotv_app_pro.dto.escritorio.FaturamentoDTO;
+import br.com.drs.radiotv_app_pro.service.escritorio.FaturamentoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,27 +12,27 @@ import java.util.List;
 @RequestMapping("/api/v1/contratoPagamento")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
-public class ContratoPagamentoController {
+public class FaturamentoController {
 
-    private final ContratoPagamentoService service;
+    private final FaturamentoService service;
 
     @PostMapping
-    public ResponseEntity<ContratoPagamentoDTO> criar(@RequestBody ContratoPagamentoDTO dto) {
+    public ResponseEntity<FaturamentoDTO> criar(@RequestBody FaturamentoDTO dto) {
         return new ResponseEntity<>(service.salvar(dto), HttpStatus.CREATED);
     }
 
     @GetMapping
-    public ResponseEntity<List<ContratoPagamentoDTO>> listarTodos() {
+    public ResponseEntity<List<FaturamentoDTO>> listarTodos() {
         return ResponseEntity.ok(service.listarTodos());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ContratoPagamentoDTO> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<FaturamentoDTO> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(service.buscarPorId(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ContratoPagamentoDTO> atualizar(@PathVariable Long id, @RequestBody ContratoPagamentoDTO dto) {
+    public ResponseEntity<FaturamentoDTO> atualizar(@PathVariable Long id, @RequestBody FaturamentoDTO dto) {
         return ResponseEntity.ok(service.atualizar(id, dto));
     }
 
@@ -43,17 +43,17 @@ public class ContratoPagamentoController {
     }
 
     @PutMapping("/{id}/faturar")
-    public ResponseEntity<ContratoPagamentoDTO> faturar(@PathVariable Long id) {
+    public ResponseEntity<FaturamentoDTO> faturar(@PathVariable Long id) {
         return ResponseEntity.ok(service.faturarParcela(id));
     }
 
     @PutMapping("/{id}/baixar")
-    public ResponseEntity<ContratoPagamentoDTO> baixar(@PathVariable Long id) {
+    public ResponseEntity<FaturamentoDTO> baixar(@PathVariable Long id) {
         return ResponseEntity.ok(service.baixarParcela(id));
     }
 
     @PutMapping("/{id}/estornar")
-    public ResponseEntity<ContratoPagamentoDTO> estornar(@PathVariable Long id) {
+    public ResponseEntity<FaturamentoDTO> estornar(@PathVariable Long id) {
         return ResponseEntity.ok(service.estornarParcela(id));
     }
 }

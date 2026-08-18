@@ -58,7 +58,7 @@ public class Contrato {
 
     @Builder.Default
     @OneToMany(mappedBy = "contrato", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ContratoPagamento> pagamentos = new ArrayList<>();
+    private List<Faturamento> pagamentos = new ArrayList<>();
 
     @Builder.Default
     private Boolean ativo = true;
@@ -68,7 +68,7 @@ public class Contrato {
         midia.setContrato(this);
     }
 
-    public void adicionarPagamento(ContratoPagamento pagamento) {
+    public void adicionarPagamento(Faturamento pagamento) {
         pagamentos.add(pagamento);
         pagamento.setContrato(this);
     }

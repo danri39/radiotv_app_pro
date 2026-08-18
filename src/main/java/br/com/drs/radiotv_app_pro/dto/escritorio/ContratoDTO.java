@@ -42,7 +42,7 @@ public class ContratoDTO {
 
     private List<ContratoMidiaDTO> midias;
 
-    private List<ContratoPagamentoDTO> pagamentos;
+    private List<FaturamentoDTO> pagamentos;
 
     private Boolean ativo;
 }
