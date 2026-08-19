@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,7 +31,7 @@ public class VendedorService {
         return repository.findAll();
     }
 
-    public List<Vendedor> buscarPorChaveUsuario(String chaveUsuario) {
+    public Optional<Vendedor> buscarPorChaveUsuario(String chaveUsuario) {
         return repository.findByChaveUsuario(chaveUsuario);
     }
 

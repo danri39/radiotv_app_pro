@@ -29,7 +29,8 @@ public interface ContratoRepository extends JpaRepository<Contrato, Long> {
             "WHERE p.dataPagamento < :hoje AND p.paga = false AND c.ativo = true")
     List<Contrato> findContratosInadimplentes(@Param("hoje") LocalDate hoje);
 
-    // CORREÇÃO AQUI: Mudado de Collection<Object> para List<Contrato> e adicionado o @Query correspondente
-    @Query("SELECT DISTINCT c FROM Contrato c LEFT JOIN FETCH c.cliente LEFT JOIN FETCH c.vendedor LEFT JOIN FETCH c.agencia")
+    @Query("SELECT DISTINCT c FROM Contrato c " +
+            "LEFT JOIN FETCH c.cliente " +
+            "LEFT JOIN FETCH c.agencia")
     List<Contrato> findAllComRelacionamentos();
 }

@@ -10,14 +10,14 @@ import org.mapstruct.MappingTarget;
 public interface ContratoMapper {
 
     @Mapping(source = "cliente.id", target = "clienteId")
-    @Mapping(source = "vendedor.id", target = "vendedorId")
+    @Mapping(source = "chaveUsuario", target = "chaveUsuario")
     @Mapping(source = "agencia.id", target = "agenciaId")
     @Mapping(source = "cliente.nomeFantasia", target = "clienteNomeFantasia")
     @Mapping(source = "agencia.nomeFantasia", target = "agenciaNomeFantasia")
     ContratoDTO toDTO(Contrato entity);
 
     @Mapping(source = "clienteId", target = "cliente.id")
-    @Mapping(source = "vendedorId", target = "vendedor.id")
+    @Mapping(source = "chaveUsuario", target = "chaveUsuario")
     @Mapping(source = "agenciaId", target = "agencia.id")
     Contrato toEntity(ContratoDTO dto);
 

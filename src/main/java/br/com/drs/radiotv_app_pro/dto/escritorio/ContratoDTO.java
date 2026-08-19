@@ -19,7 +19,7 @@ public class ContratoDTO {
     private Long clienteId;
     private String clienteNomeFantasia;
 
-    private Long vendedorId;
+    private String chaveUsuario;
 
     private Long agenciaId;
     private String agenciaNomeFantasia;

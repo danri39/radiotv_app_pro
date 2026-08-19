@@ -31,12 +31,13 @@ public class ContratoService {
         Cliente cliente = clienteRepository.findById(dto.getClienteId())
                 .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado."));
 
-        Vendedor vendedor = vendedorRepository.findById(dto.getVendedorId())
-                .orElseThrow(() -> new IllegalArgumentException("Vendedor não encontrado."));
+        // Valida se o vendedor existe pela chave de 8 dígitos
+        Vendedor vendedor = vendedorRepository.findByChaveUsuario(dto.getChaveUsuario())
+                .orElseThrow(() -> new IllegalArgumentException("Vendedor não encontrado com a chave: " + dto.getChaveUsuario()));
 
         Contrato contrato = mapper.toEntity(dto);
         contrato.setCliente(cliente);
-        contrato.setVendedor(vendedor);
+        contrato.setChaveUsuario(vendedor.getChaveUsuario());
 
         if (dto.getAgenciaId() != null) {
             Agencia agencia = agenciaRepository.findById(dto.getAgenciaId())
@@ -51,7 +52,6 @@ public class ContratoService {
     }
 
     public List<ContratoDTO> listarTodos() {
-        // Usa a query otimizada do repositório para popular cliente, vendedor e agência
         return repository.findAllComRelacionamentos().stream()
                 .map(mapper::toDTO)
                 .toList();
@@ -59,16 +59,15 @@ public class ContratoService {
 
     public ContratoDTO buscarPorId(Long id) {
         Contrato contrato = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Contrato não encontrado"));
+                .orElseThrow(() -> new RuntimeException("Contrato não encontrado com ID: " + id));
         return mapper.toDTO(contrato);
     }
 
     @Transactional
     public ContratoDTO atualizar(Long id, ContratoDTO dto) {
         Contrato contratoExistente = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Contrato não encontrado"));
+                .orElseThrow(() -> new RuntimeException("Contrato não encontrado com ID: " + id));
 
-        // Atualiza os campos básicos
         contratoExistente.setDataInicio(dto.getDataInicio());
         contratoExistente.setDataFinal(dto.getDataFinal());
         contratoExistente.setValorTotal(dto.getValorTotal());
@@ -82,21 +81,18 @@ public class ContratoService {
             contratoExistente.setAtivo(dto.getAtivo());
         }
 
-        // Atualiza o Cliente com segurança
         if (dto.getClienteId() != null) {
             Cliente cliente = clienteRepository.findById(dto.getClienteId())
                     .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado."));
             contratoExistente.setCliente(cliente);
         }
 
-        // Atualiza o Vendedor com segurança
-        if (dto.getVendedorId() != null) {
-            Vendedor vendedor = vendedorRepository.findById(dto.getVendedorId())
-                    .orElseThrow(() -> new IllegalArgumentException("Vendedor não encontrado."));
-            contratoExistente.setVendedor(vendedor);
+        if (dto.getChaveUsuario() != null) {
+            Vendedor vendedor = vendedorRepository.findByChaveUsuario(dto.getChaveUsuario())
+                    .orElseThrow(() -> new IllegalArgumentException("Vendedor não encontrado com a chave: " + dto.getChaveUsuario()));
+            contratoExistente.setChaveUsuario(vendedor.getChaveUsuario());
         }
 
-        // Atualiza a Agência com segurança (pode ser nula)
         if (dto.getAgenciaId() != null) {
             Agencia agencia = agenciaRepository.findById(dto.getAgenciaId())
                     .orElseThrow(() -> new IllegalArgumentException("Agência não cadastrada no sistema."));
@@ -112,7 +108,7 @@ public class ContratoService {
     @Transactional
     public void deletar(Long id) {
         if (!repository.existsById(id)) {
-            throw new RuntimeException("Contrato não encontrado");
+            throw new RuntimeException("Contrato não encontrado com ID: " + id);
         }
         repository.deleteById(id);
     }

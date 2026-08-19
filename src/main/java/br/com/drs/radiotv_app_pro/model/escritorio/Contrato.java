@@ -26,9 +26,8 @@ public class Contrato {
     @JoinColumn(name = "cliente_id", nullable = false)
     private Cliente cliente;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "vendedor_id", nullable = false)
-    private Vendedor vendedor;
+    @Column(nullable = false, length = 8)
+    private String chaveUsuario;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "agencia_id")
