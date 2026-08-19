@@ -16,7 +16,7 @@ public class FamiliaDTO {
 
     private Long id;
 
-    private Long funcionarioId;
+    private String chaveUsuario;
 
     private String nome;
 

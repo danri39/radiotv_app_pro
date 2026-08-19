@@ -30,22 +30,15 @@ public class FamiliaService {
     }
 
     @Transactional(readOnly = true)
-    public List<FamiliaDTO> listarPorFuncionario(Long funcionarioId) {
-        return familiaRepository.findByFuncionarioId(funcionarioId).stream()
+    public List<FamiliaDTO> buscarPorChaveUsuario(String chaveUsuario) {
+        return familiaRepository.findByChaveUsuario(chaveUsuario).stream()
                 .map(familiaMapper::toDTO)
-                .collect(Collectors.toList());
-    }
-
-    @Transactional(readOnly = true)
-    public FamiliaDTO buscarPorId(Long id) {
-        Familia familia = familiaRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Membro da família não encontrado com o ID: " + id));
-        return familiaMapper.toDTO(familia);
+                .toList();
     }
 
     @Transactional
     public FamiliaDTO salvar(FamiliaDTO dto) {
-        if (dto.getFuncionarioId() == null) {
+        if (dto.getChaveUsuario() == null) {
             throw new IllegalArgumentException("O ID do funcionário é obrigatório para vincular o familiar.");
         }
         if (dto.getNome() == null || dto.getNome().isBlank()) {
@@ -56,11 +49,11 @@ public class FamiliaService {
         }
 
         // Garante que o funcionário informado realmente existe no banco
-        Funcionario funcionario = funcionarioRepository.findById(dto.getFuncionarioId())
+        Funcionario funcionario = (Funcionario) funcionarioRepository.findByChaveUsuario(dto.getChaveUsuario())
                 .orElseThrow(() -> new IllegalArgumentException("Funcionário não encontrado com o ID fornecido."));
 
         Familia familia = familiaMapper.toEntity(dto);
-        familia.setFuncionario(funcionario); // Vincula a entidade real buscada do banco
+        familia.setChaveUsuario(dto.getChaveUsuario());
         familia.setAtivo(true);
 
         return familiaMapper.toDTO(familiaRepository.save(familia));
@@ -92,11 +85,11 @@ public class FamiliaService {
         }
 
         // Se o funcionário foi alterado no DTO, atualiza o vínculo com segurança
-        if (dto.getFuncionarioId() != null &&
-                (familiaExistente.getFuncionario() == null || !familiaExistente.getFuncionario().getId().equals(dto.getFuncionarioId()))) {
-            Funcionario novoFuncionario = funcionarioRepository.findById(dto.getFuncionarioId())
+        if (dto.getChaveUsuario() != null &&
+                (familiaExistente.getChaveUsuario() == null || !familiaExistente.getChaveUsuario().equals(dto.getChaveUsuario()))) {
+            Funcionario novoFuncionario = (Funcionario) funcionarioRepository.findByChaveUsuario(dto.getChaveUsuario())
                     .orElseThrow(() -> new IllegalArgumentException("Funcionário não encontrado com o ID fornecido."));
-            familiaExistente.setFuncionario(novoFuncionario);
+            familiaExistente.setChaveUsuario(dto.getChaveUsuario());
         }
 
         return familiaMapper.toDTO(familiaRepository.save(familiaExistente));

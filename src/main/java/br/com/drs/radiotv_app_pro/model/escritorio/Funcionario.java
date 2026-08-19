@@ -1,7 +1,6 @@
 package br.com.drs.radiotv_app_pro.model.escritorio;
 
 import br.com.drs.radiotv_app_pro.model.enuns.Formacao;
-import br.com.drs.radiotv_app_pro.model.enuns.Setor;
 import br.com.drs.radiotv_app_pro.model.enuns.Sexo;
 import br.com.drs.radiotv_app_pro.model.enuns.TipoPessoa;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -10,7 +9,6 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
 
 @Getter
 @Setter
@@ -87,12 +85,6 @@ public class Funcionario {
 
     @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate demissao;
-
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "funcionario_setores", joinColumns = @JoinColumn(name = "funcionario_id"))
-    @Column(name = "setor")
-    @Enumerated(EnumType.STRING)
-    private List<Setor> setores;
 
     @Column(precision = 10, scale = 2)
     private BigDecimal salario;

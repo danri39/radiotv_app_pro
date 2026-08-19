@@ -22,14 +22,9 @@ public class FamiliaController {
         return ResponseEntity.ok(familiaService.listarTodos());
     }
 
-    @GetMapping("/funcionario/{funcionarioId}")
-    public ResponseEntity<List<FamiliaDTO>> listarPorFuncionario(@PathVariable Long funcionarioId) {
-        return ResponseEntity.ok(familiaService.listarPorFuncionario(funcionarioId));
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<FamiliaDTO> buscarPorId(@PathVariable Long id) {
-        return ResponseEntity.ok(familiaService.buscarPorId(id));
+    @GetMapping("/{ChaveUsuario}")
+    public ResponseEntity<List<FamiliaDTO>> listarPorChaveUsuario(@PathVariable String chaveUsuario) {
+        return ResponseEntity.ok(familiaService.buscarPorChaveUsuario(chaveUsuario));
     }
 
     @PostMapping

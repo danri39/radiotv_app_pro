@@ -16,7 +16,6 @@ public class ConfigEscritorio {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // --- 🏦 CONFIGURAÇÕES BANCÁRIAS PADRÃO ---
     private String agenciaPadrao;
 
     private String contaCorrentePadrao;
@@ -25,10 +24,8 @@ public class ConfigEscritorio {
 
     private String codigoCedentePadrao;
 
-    // Código de Transmissão ou Código do Convênio (Exigido por alguns bancos no CNAB)
     private String codigoConvenioBancario;
 
-    // --- 📝 PARAMETRIZAÇÃO DE BOLETOS (REGRAS DE COBRANÇA) ---
     @Column(name = "percentual_multa_atraso")
     private Double percentualMultaAtraso; // Ex: 2.00 (%)
 
