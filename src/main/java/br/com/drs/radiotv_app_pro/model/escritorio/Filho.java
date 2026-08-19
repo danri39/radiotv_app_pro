@@ -21,9 +21,8 @@ public class Filho {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "funcionario_id", nullable = false)
-    private Funcionario funcionario;
+    @Column(nullable = false, unique = true, length = 8)
+    private String chaveUsuario;
 
     @Column(nullable = false, length = 150)
     private String nome;

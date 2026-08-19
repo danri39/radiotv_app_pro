@@ -27,9 +27,9 @@ public class FilhoController {
         return service.listarTodos();
     }
 
-    @GetMapping("/funcionario/{funcionarioId}")
-    public ResponseEntity<List<FilhoDTO>> listarPorFuncionario(@PathVariable Long funcionarioId) {
-        return ResponseEntity.ok(service.listarPorFuncionario(funcionarioId));
+    @GetMapping("/funcionario/{chaveUsuario}")
+    public ResponseEntity<List<FilhoDTO>> listarPorFuncionario(@PathVariable String chaveUsuario) {
+        return ResponseEntity.ok(service.listarPorFuncionario(chaveUsuario));
     }
 
     @PutMapping("/{id}")

@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface FilhoRepository extends JpaRepository<Filho, Long> {
 
-    List<Filho> findByFuncionarioId(Long funcionarioId);
+    List<Filho> findByChaveUsuario(String chaveUsuario);
 }

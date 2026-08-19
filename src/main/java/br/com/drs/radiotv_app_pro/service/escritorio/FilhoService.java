@@ -29,8 +29,9 @@ public class FilhoService {
     }
 
     @Transactional(readOnly = true)
-    public List<FilhoDTO> listarPorFuncionario(Long funcionarioId) {
-        return filhoRepository.findByFuncionarioId(funcionarioId).stream()
+    public List<FilhoDTO> listarPorFuncionario(String chaveUsuario) {
+        return filhoRepository.findByChaveUsuario(chaveUsuario)
+                .stream()
                 .map(filhoMapper::toDTO)
                 .collect(Collectors.toList());
     }
@@ -44,18 +45,18 @@ public class FilhoService {
 
     @Transactional
     public FilhoDTO salvar(FilhoDTO dto) {
-        if (dto.getFuncionarioId() == null) {
+        if (dto.getChaveUsuario() == null) {
             throw new IllegalArgumentException("O ID do funcionário é obrigatório para vincular o filho(a).");
         }
         if (dto.getNome() == null || dto.getNome().isBlank()) {
             throw new IllegalArgumentException("O nome do filho(a) é obrigatório.");
         }
 
-        Funcionario funcionario = funcionarioRepository.findById(dto.getFuncionarioId())
-                .orElseThrow(() -> new IllegalArgumentException("Funcionário não encontrado com o ID: " + dto.getFuncionarioId()));
+        Funcionario funcionario = (Funcionario) funcionarioRepository.findByChaveUsuario(dto.getChaveUsuario())
+                .orElseThrow(() -> new IllegalArgumentException("Funcionário não encontrado com o ID: " + dto.getChaveUsuario()));
 
         Filho filho = filhoMapper.toEntity(dto);
-        filho.setFuncionario(funcionario);
+        filho.setChaveUsuario(dto.getChaveUsuario());
         filho.setAtivo(true);
 
         return filhoMapper.toDTO(filhoRepository.save(filho));
@@ -80,11 +81,11 @@ public class FilhoService {
         }
 
         // Atualiza o vínculo do funcionário apenas se foi informado e alterado
-        if (dto.getFuncionarioId() != null &&
-                (filhoExistente.getFuncionario() == null || !filhoExistente.getFuncionario().getId().equals(dto.getFuncionarioId()))) {
-            Funcionario funcionario = funcionarioRepository.findById(dto.getFuncionarioId())
-                    .orElseThrow(() -> new IllegalArgumentException("Funcionário não encontrado com o ID: " + dto.getFuncionarioId()));
-            filhoExistente.setFuncionario(funcionario);
+        if (dto.getChaveUsuario() != null &&
+                (filhoExistente.getChaveUsuario() == null || !filhoExistente.getChaveUsuario().equals(dto.getChaveUsuario()))) {
+            Funcionario funcionario = (Funcionario) funcionarioRepository.findByChaveUsuario(dto.getChaveUsuario())
+                    .orElseThrow(() -> new IllegalArgumentException("Funcionário não encontrado com o ID: " + dto.getChaveUsuario()));
+            filhoExistente.setChaveUsuario(dto.getChaveUsuario());
         }
 
         return filhoMapper.toDTO(filhoRepository.save(filhoExistente));
