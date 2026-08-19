@@ -1,6 +1,7 @@
 package br.com.drs.radiotv_app_pro.model.escritorio;
 
 import br.com.drs.radiotv_app_pro.model.enuns.Formacao;
+import br.com.drs.radiotv_app_pro.model.enuns.Setor;
 import br.com.drs.radiotv_app_pro.model.enuns.Sexo;
 import br.com.drs.radiotv_app_pro.model.enuns.TipoPessoa;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -9,6 +10,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -23,6 +25,9 @@ public class Funcionario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, unique = true, length = 8)
+    private String chaveUsuario;
+
     @Column(nullable = false, length = 150)
     private String nome;
 
@@ -30,10 +35,10 @@ public class Funcionario {
     @Column(nullable = false, length = 20)
     private TipoPessoa tipoPessoa;
 
-    @Column(unique = true, length = 14)
+    @Column(unique = true, length = 18)
     private String cpf;
 
-    @Column(unique = true, length = 14)
+    @Column(unique = true, length = 18)
     private String cnpj;
 
     @Column(length = 20)
@@ -83,7 +88,11 @@ public class Funcionario {
     @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate demissao;
 
-    private String cargo;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "funcionario_setores", joinColumns = @JoinColumn(name = "funcionario_id"))
+    @Column(name = "setor")
+    @Enumerated(EnumType.STRING)
+    private List<Setor> setores;
 
     @Column(precision = 10, scale = 2)
     private BigDecimal salario;

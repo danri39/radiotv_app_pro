@@ -13,5 +13,7 @@ public interface FuncionarioRepository extends JpaRepository<Funcionario, Long> 
 
     boolean existsByEmail(String email);
 
-    Optional<Funcionario> findByEmail(String email);
+    Optional<Object> findByChaveUsuario(String chaveUsuario);
+
+    Optional<Funcionario> findByNomeAndChaveUsuario(String nome, String chaveUsuario);
 }

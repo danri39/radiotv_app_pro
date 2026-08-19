@@ -1,14 +1,15 @@
 package br.com.drs.radiotv_app_pro.dto.escritorio;
 
 import br.com.drs.radiotv_app_pro.model.enuns.Formacao;
+import br.com.drs.radiotv_app_pro.model.enuns.Setor;
 import br.com.drs.radiotv_app_pro.model.enuns.Sexo;
 import br.com.drs.radiotv_app_pro.model.enuns.TipoPessoa;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.persistence.Column;
 import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -18,6 +19,8 @@ import java.time.LocalDate;
 public class FuncionarioDTO {
 
     private Long id;
+
+    private String chaveUsuario;
 
     private String nome;
 
@@ -64,12 +67,10 @@ public class FuncionarioDTO {
     @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate demissao;
 
-    private String cargo;
+    private List<Setor> setores;
 
-    @Column(precision = 10, scale = 2)
     private BigDecimal salario;
 
-    @Column(length = 11)
     private String pisPasep;
 
     private String banco;

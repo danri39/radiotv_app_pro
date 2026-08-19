@@ -62,7 +62,7 @@ public class UsuarioService {
         Usuario novoUsuario = Usuario.builder()
                 .nome(dto.getNome())
                 .email(dto.getEmail())
-                .chaveUsuario(KeyGeneratorUtil.gerarChaveUsuario())
+                .chaveUsuario(KeyGeneratorUtil.gerarChaveUsuario(Setor.OUTROS))
                 .chavePrimeiroAcesso(KeyGeneratorUtil.gerarChavePrimeiroAcesso())
                 .papeis(Papel.CONVIDADO)
                 .setores(List.of(Setor.OUTROS))

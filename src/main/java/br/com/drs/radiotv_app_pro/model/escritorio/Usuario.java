@@ -32,7 +32,7 @@ public class Usuario implements org.springframework.security.core.userdetails.Us
 
     private String senha;
 
-    @Column(length = 4)
+    @Column(length = 8, unique = true)
     private String chaveUsuario;
 
     @Builder.Default
@@ -63,8 +63,6 @@ public class Usuario implements org.springframework.security.core.userdetails.Us
     private Boolean primeiroAcesso = true;
 
     private LocalDateTime acessoSistema;
-
-    private Long funcionarioId;
 
     @Builder.Default
     private Boolean ativo = true;

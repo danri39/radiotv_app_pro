@@ -12,5 +12,5 @@ public interface FuncionarioMapper {
 
     Funcionario toEntity(FuncionarioDTO dto);
 
-    void updateEntityFromDto(FuncionarioDTO dto, @MappingTarget Funcionario funcionario);
+    Funcionario updateEntityFromDto(FuncionarioDTO dto, @MappingTarget Funcionario funcionario);
 }
