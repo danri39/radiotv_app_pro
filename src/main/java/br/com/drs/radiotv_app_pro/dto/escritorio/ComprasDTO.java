@@ -15,7 +15,7 @@ public class ComprasDTO {
 
     private Long id;
 
-    private Long funcionarioId;
+    private String chaveUsuario;
 
     @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate dataCompra;

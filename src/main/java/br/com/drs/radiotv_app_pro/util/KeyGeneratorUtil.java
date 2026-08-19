@@ -27,6 +27,10 @@ public class KeyGeneratorUtil {
         return gerar(40, CARACTERES_GERAIS).toLowerCase();
     }
 
+    public static String gerarChaveCompras() {
+        return gerar(40, CARACTERES_GERAIS).toLowerCase();
+    }
+
     public static String gerarChaveTrocaSenha() {
         return gerar(45, CARACTERES_GERAIS).toLowerCase();
     }

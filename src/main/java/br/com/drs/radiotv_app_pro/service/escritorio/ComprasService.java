@@ -8,6 +8,7 @@ import br.com.drs.radiotv_app_pro.model.escritorio.Produto;
 import br.com.drs.radiotv_app_pro.repository.escritorio.ComprasRepository;
 import br.com.drs.radiotv_app_pro.repository.escritorio.FuncionarioRepository;
 import br.com.drs.radiotv_app_pro.repository.escritorio.ProdutoRepository;
+import br.com.drs.radiotv_app_pro.util.KeyGeneratorUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,15 +27,15 @@ public class ComprasService {
     @Transactional
     public ComprasDTO salvar(ComprasDTO dto) {
         // Busca direta pelo ID que vem do Front-end
-        Funcionario funcionario = funcionarioRepository.findById(dto.getFuncionarioId())
-                .orElseThrow(() -> new RuntimeException("Funcionário não encontrado ID: " + dto.getFuncionarioId()));
+        Funcionario funcionario = (Funcionario) funcionarioRepository.findByChaveUsuario(dto.getChaveUsuario())
+                .orElseThrow(() -> new RuntimeException("Funcionário não encontrado ID: " + dto.getChaveUsuario()));
 
         Produto produto = produtoRepository.findById(dto.getProdutoId())
                 .orElseThrow(() -> new RuntimeException("Produto não encontrado ID: " + dto.getProdutoId()));
 
         Compras entidade = new Compras();
         // IMPORTANTE: Não setar o ID manualmente, deixe o @GeneratedValue do JPA trabalhar!
-        entidade.setFuncionario(funcionario);
+        entidade.setChaveUsuario(dto.getChaveUsuario());
         entidade.setProdutos(produto);
         entidade.setQuantidade(dto.getQuantidade());
         entidade.setValorCompra(dto.getValorCompra());
@@ -74,5 +75,29 @@ public class ComprasService {
             throw new RuntimeException("Não é possível deletar. Compra não encontrada com o ID: " + id);
         }
         repository.deleteById(id);
+    }
+
+    @Transactional
+    public ComprasDTO aprovarCompra(Long id) {
+        Compras compra = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Compra não encontrada ID: " + id));
+
+        compra.setCompraAceita(true);
+        compra.setJustificativaRecusa(null);
+        compra.setChaveAdministrador(KeyGeneratorUtil.gerarChaveCompras()); // Chave de segurança para liberar pagamento
+
+        return mapper.toDTO(repository.save(compra));
+    }
+
+    @Transactional
+    public ComprasDTO recusarCompra(Long id, String justificativa) {
+        Compras compra = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Compra não encontrada ID: " + id));
+
+        compra.setCompraAceita(false);
+        compra.setJustificativaRecusa(justificativa);
+        compra.setChaveAdministrador(null);
+
+        return mapper.toDTO(repository.save(compra));
     }
 }

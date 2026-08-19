@@ -41,4 +41,15 @@ public class ComprasController {
         service.deletar(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PutMapping("/{id}/aprovar")
+    public ResponseEntity<ComprasDTO> aprovar(@PathVariable Long id) {
+        return ResponseEntity.ok(service.aprovarCompra(id));
+    }
+
+    @PutMapping("/{id}/recusar")
+    public ResponseEntity<ComprasDTO> recusar(@PathVariable Long id, @RequestBody java.util.Map<String, String> body) {
+        String justificativa = body.getOrDefault("justificativa", "Sem justificativa informada");
+        return ResponseEntity.ok(service.recusarCompra(id, justificativa));
+    }
 }

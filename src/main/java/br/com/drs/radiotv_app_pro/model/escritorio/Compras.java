@@ -22,9 +22,8 @@ public class Compras {
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "funcionario_id", nullable = false)
-    private Funcionario funcionario;
+    @Column(nullable = false, length = 8)
+    private String chaveUsuario;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "produtos_id", nullable = false)

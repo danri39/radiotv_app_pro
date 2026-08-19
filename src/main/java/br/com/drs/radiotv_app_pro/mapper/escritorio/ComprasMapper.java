@@ -9,15 +9,15 @@ import org.mapstruct.MappingTarget;
 @Mapper(componentModel = "spring")
 public interface ComprasMapper {
 
-    @Mapping(source = "funcionario.id", target = "funcionarioId")
+    @Mapping(source = "chaveUsuario", target = "chaveUsuario")
     @Mapping(source = "produtos.id", target = "produtoId")
     ComprasDTO toDTO(Compras entidade);
 
-    @Mapping(source = "funcionarioId", target = "funcionario.id")
+    @Mapping(source = "chaveUsuario", target = "chaveUsuario")
     @Mapping(source = "produtoId", target = "produtos.id")
     Compras toEntity(ComprasDTO dto);
 
-    @Mapping(source = "funcionarioId", target = "funcionario.id")
+    @Mapping(source = "chaveUsuario", target = "chaveUsuario")
     @Mapping(source = "produtoId", target = "produtos.id")
     void updateEntityFromDto(ComprasDTO dto, @MappingTarget Compras entidade);
 }
