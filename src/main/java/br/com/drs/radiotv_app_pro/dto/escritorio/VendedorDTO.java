@@ -1,6 +1,5 @@
 package br.com.drs.radiotv_app_pro.dto.escritorio;
 
-import br.com.drs.radiotv_app_pro.model.escritorio.Funcionario;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,7 +15,7 @@ public class VendedorDTO {
 
     private Long id;
 
-    private Funcionario funcionario;
+    private String chaveUsuario;
 
     private BigDecimal metaMes;
 

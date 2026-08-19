@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -28,11 +27,11 @@ public class VendedorService {
     }
 
     public List<Vendedor> listarTodos() {
-        return repository.findAllComFuncionario();
+        return repository.findAll();
     }
 
-    public Optional<Vendedor> buscarPorId(Long id) {
-        return repository.findById(id);
+    public List<Vendedor> buscarPorChaveUsuario(String chaveUsuario) {
+        return repository.findByChaveUsuario(chaveUsuario);
     }
 
     @Transactional
@@ -40,10 +39,10 @@ public class VendedorService {
         Vendedor vendedorExistente = repository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Vendedor não encontrado na base de dados."));
 
-        if (dto.getFuncionario() != null && dto.getFuncionario().getId() != null) {
-            Funcionario func = funcionarioRepository.findById(dto.getFuncionario().getId())
+        if (dto.getChaveUsuario() != null && dto.getChaveUsuario() != null) {
+            Funcionario func = (Funcionario) funcionarioRepository.findByChaveUsuario(dto.getChaveUsuario())
                     .orElseThrow(() -> new IllegalArgumentException("Funcionário não encontrado."));
-            vendedorExistente.setFuncionario(func);
+            vendedorExistente.setChaveUsuario(dto.getChaveUsuario());
         }
 
         vendedorExistente.setMetaMes(dto.getMetaMes());

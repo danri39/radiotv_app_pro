@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/vendedor")
@@ -27,9 +26,9 @@ public class VendedorController {
         return service.listarTodos();
     }
 
-    @GetMapping("/{id}")
-    public Optional<Vendedor> buscarPorId(@PathVariable Long id) {
-        return service.buscarPorId(id);
+    @GetMapping("/{chaveUsuario}")
+    public List<Vendedor> buscarPoirChaveUsuario(@PathVariable String chaveUsuario) {
+        return service.buscarPorChaveUsuario(chaveUsuario);
     }
 
     @PutMapping("/{id}")
