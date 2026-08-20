@@ -1,7 +1,5 @@
 package br.com.drs.radiotv_app_pro.dto.escritorio;
 
-import br.com.drs.radiotv_app_pro.model.escritorio.Agencia;
-import br.com.drs.radiotv_app_pro.model.escritorio.Contrato;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 
@@ -17,9 +15,11 @@ public class ComissaoDTO {
 
     private Long id;
 
-    private Contrato contrato;
+    private Long contratoId;
 
-    private Agencia agencia;
+    private Long agenciaId;
+
+    private String nomeAgencia;
 
     private String chaveUsuario;
 

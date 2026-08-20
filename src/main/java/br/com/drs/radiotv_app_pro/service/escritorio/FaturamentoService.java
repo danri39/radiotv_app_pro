@@ -138,14 +138,16 @@ public class FaturamentoService {
 
         String chaveVendedor = contrato.getChaveUsuario();
         if (chaveVendedor == null || chaveVendedor.isBlank()) {
-            log.warn("Contrato ID: {} não possui chaveUsuario (vendedor) preenchida. Comissão não gerada.", contrato.getId());
+            log.warn("Contrato ID: {} não possui chaveUsuario preenchida. Comissão não gerada.", contrato.getId());
             return;
         }
 
         BigDecimal valorParcela = fatura.getValorParcela() != null ? fatura.getValorParcela() : BigDecimal.ZERO;
-        BigDecimal comissaoVendedor = valorParcela.multiply(new BigDecimal("0.10")); // 10% do vendedor
+
+        // Percentuais padrões de comissão (10% vendedor e 5% agência se houver)
+        BigDecimal comissaoVendedor = valorParcela.multiply(new BigDecimal("0.10"));
         BigDecimal comissaoAgencia = (contrato.getAgencia() != null)
-                ? valorParcela.multiply(new BigDecimal("0.05")) // 5% da agência
+                ? valorParcela.multiply(new BigDecimal("0.05"))
                 : BigDecimal.ZERO;
 
         String numeroFatura = (fatura.getNumeroFatura() != null && !fatura.getNumeroFatura().isBlank())
@@ -167,7 +169,7 @@ public class FaturamentoService {
                 .build();
 
         comissaoRepository.save(novaComissao);
-        log.info("Comissão gerada para o vendedor chave: {}, contrato: {}, fatura: {}, valor comissão: R$ {}",
+        log.info("Comissão gerada com sucesso! Vendedor: {}, Contrato: {}, Fatura: {}, Valor: R$ {}",
                 chaveVendedor, contrato.getId(), numeroFatura, comissaoVendedor);
     }
 }
