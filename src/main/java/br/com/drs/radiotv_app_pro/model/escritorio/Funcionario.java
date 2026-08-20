@@ -23,7 +23,7 @@ public class Funcionario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 8)
+    @Column(nullable = false, length = 8)
     private String chaveUsuario;
 
     @Column(nullable = false, length = 150)
