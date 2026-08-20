@@ -61,6 +61,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/horarioBreak/**").permitAll()
                         .requestMatchers("/api/v1/pagamento/**").permitAll()
                         .requestMatchers("/api/v1/administracao/**").permitAll()
+                        .requestMatchers("/api/v1/comissao/**").permitAll()
 
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()

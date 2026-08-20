@@ -2,12 +2,15 @@ package br.com.drs.radiotv_app_pro.service.escritorio;
 
 import br.com.drs.radiotv_app_pro.dto.escritorio.PagamentoDTO;
 import br.com.drs.radiotv_app_pro.mapper.escritorio.PagamentoMapper;
+import br.com.drs.radiotv_app_pro.model.enuns.Status;
 import br.com.drs.radiotv_app_pro.model.escritorio.Pagamento;
 import br.com.drs.radiotv_app_pro.repository.escritorio.PagamentoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,5 +56,22 @@ public class PagamentoService {
 
     public void excluir(Long id) {
         repository.deleteById(id);
+    }
+
+    @Transactional
+    public List<PagamentoDTO> salvarRecorrente(PagamentoDTO dto, int quantidadeMeses) {
+        List<Pagamento> lista = new ArrayList<>();
+        LocalDate vencimento = dto.getDataVencimento();
+
+        for (int i = 0; i < quantidadeMeses; i++) {
+            Pagamento p = mapper.toEntity(dto);
+            p.setId(null);
+            p.setDataVencimento(vencimento.plusMonths(i));
+            p.setStatus(Status.PENDENTE); 
+            p.setAtivo(true);
+            lista.add(p);
+        }
+
+        return repository.saveAll(lista).stream().map(mapper::toDto).toList();
     }
 }

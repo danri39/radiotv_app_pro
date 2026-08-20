@@ -33,7 +33,8 @@ public class Faturamento {
 
     private Boolean paga;
 
-    private LocalDate dataPagamentoReal; // Data em que o cliente realmente pagou
+    @JsonFormat(pattern = "dd/MM/yyyy")
+    private LocalDate dataPagamentoReal;
 
     private String numeroFatura; // Ex: FAT-2026-0001
 
