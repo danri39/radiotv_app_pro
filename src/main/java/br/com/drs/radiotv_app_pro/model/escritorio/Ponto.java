@@ -18,9 +18,8 @@ public class Ponto {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "funcionario_id", nullable = false)
-    private Funcionario funcionario;
+    @Column(nullable = false, length = 8)
+    private String chaveUsuario;
 
     private LocalDateTime horaEntrada;
 

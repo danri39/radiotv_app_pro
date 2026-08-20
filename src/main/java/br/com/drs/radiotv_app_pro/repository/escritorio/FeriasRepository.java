@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface FeriasRepository extends JpaRepository<Ferias, Long> {
-    List<Ferias> findByFuncionarioId(Long funcionarioId);
+    List<Ferias> findByChaveUsuario(String chaveUsuario);
 }

@@ -1,6 +1,5 @@
 package br.com.drs.radiotv_app_pro.dto.escritorio;
 
-import br.com.drs.radiotv_app_pro.model.escritorio.Funcionario;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 
@@ -15,7 +14,7 @@ public class FeriasDTO {
 
     private Long id;
 
-    private Funcionario funcionario;
+    private String chaveUsuario;
 
     @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate dataInicio;
@@ -29,11 +28,11 @@ public class FeriasDTO {
 
     private Boolean aprovada;
 
-    // NOVOS CAMPOS PARA SUPORTE A ABONO PECUNIÁRIO (VENDA DE FÉRIAS — CLT)Sim
     private Boolean abonoPecuniario; // Identifica se vendeu parte das férias
 
     private Integer quantidadeDiasAbono; // Máximo 10 dias pela CLT
 
-    // Campo para armazenar o porquê de o RH ter negado o pedido
     private String motivoRecusa;
+
+    private String alertaConcessivo;
 }

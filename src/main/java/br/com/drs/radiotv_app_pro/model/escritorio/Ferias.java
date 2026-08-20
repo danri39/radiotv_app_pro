@@ -19,9 +19,8 @@ public class Ferias {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "funcionario_id", nullable = false)
-    private Funcionario funcionario;
+    @Column(nullable = false, length = 8)
+    private String chaveUsuario;
 
     @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate dataInicio;
@@ -29,17 +28,15 @@ public class Ferias {
     @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate dataFim;
 
-    private Integer quantidadeDias; // Dias efetivos de folga (Gozo)
+    private Integer quantidadeDias;
 
-    private Integer anoReferenciaAquisitivo; // Ex: 2026
+    private Integer anoReferenciaAquisitivo;
 
     private Boolean aprovada;
 
-    // NOVOS CAMPOS PARA SUPORTE A ABONO PECUNIÁRIO (VENDA DE FÉRIAS — CLT)Sim
-    private Boolean abonoPecuniario; // Identifica se vendeu parte das férias
+    private Boolean abonoPecuniario;
 
-    private Integer quantidadeDiasAbono; // Máximo 10 dias pela CLT
+    private Integer quantidadeDiasAbono;
 
-    // Campo para armazenar o porquê de o RH ter negado o pedido
     private String motivoRecusa;
 }

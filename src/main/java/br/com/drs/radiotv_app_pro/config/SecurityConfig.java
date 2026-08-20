@@ -50,7 +50,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/programa/**").permitAll()
                         .requestMatchers("/api/v1/ramoAtividade/**").permitAll()
                         .requestMatchers("/api/v1/configEscritorio/**").permitAll()
-                        .requestMatchers("/api/v1/ponto/**").permitAll()
+                        .requestMatchers("/api/v1/pontos/**").permitAll()
                         .requestMatchers("/api/v1/beneficio/**").permitAll()
                         .requestMatchers("/api/v1/produto/**").permitAll()
                         .requestMatchers("/api/v1/compras/**").permitAll()
