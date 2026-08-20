@@ -30,4 +30,18 @@ public interface ComissaoRepository extends JpaRepository<Comissao, Long> {
             "WHERE c.agencia.id = :agenciaId " +
             "AND c.pagaAgencia = false")
     BigDecimal somarComissoesPendentesAgencia(@Param("agenciaId") Long agenciaId);
+
+    @Query(value = """
+        SELECT COALESCE(SUM(c.comissao_vendedor), 0)
+        FROM comissao c
+        WHERE c.chave_vendedor = :chaveUsuario
+          AND MONTH(c.data_recebimento) = :mes
+          AND YEAR(c.data_recebimento) = :ano
+          AND c.status = 'Liquidado'
+    """, nativeQuery = true)
+    BigDecimal somarComissoesPorVendedorEMes(
+            @Param("chaveUsuario") String chaveUsuario,
+            @Param("mes") int mes,
+            @Param("ano") int ano
+    );
 }

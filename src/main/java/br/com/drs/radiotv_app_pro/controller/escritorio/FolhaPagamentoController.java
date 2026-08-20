@@ -22,6 +22,17 @@ public class FolhaPagamentoController {
         return new ResponseEntity<>(service.calcularFolha(dto), HttpStatus.CREATED);
     }
 
+    @PostMapping("/processar-lote")
+    public ResponseEntity<List<FolhaPagamentoDTO>> processarLote(@RequestParam String mesAno) {
+        return ResponseEntity.ok(service.processarFolhaLote(mesAno));
+    }
+
+    @PostMapping("/exportar-txt")
+    public ResponseEntity<Void> exportarArquivoTxt(@RequestParam String mesAno) {
+        service.exportarArquivoSalariosTxt(mesAno);
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping
     public ResponseEntity<List<FolhaPagamentoDTO>> listarTodas() {
         return ResponseEntity.ok(service.listarTodas());

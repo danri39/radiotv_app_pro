@@ -32,11 +32,6 @@ public class BeneficiosController {
         return ResponseEntity.ok(service.buscarPorId(id));
     }
 
-    @GetMapping("/funcionario/{funcionarioId}")
-    public ResponseEntity<List<BeneficiosDTO>> listarPorFuncionario(@PathVariable Long funcionarioId) {
-        return ResponseEntity.ok(service.listarPorFuncionario(funcionarioId));
-    }
-
     @PutMapping("/{id}")
     public ResponseEntity<BeneficiosDTO> atualizar(@PathVariable Long id, @RequestBody BeneficiosDTO dto) {
         return ResponseEntity.ok(service.atualizar(id, dto));

@@ -1,5 +1,7 @@
 package br.com.drs.radiotv_app_pro.model.escritorio;
 
+import br.com.drs.radiotv_app_pro.model.enuns.ModalidadeCobranca;
+import br.com.drs.radiotv_app_pro.model.enuns.TipoBeneficio;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,24 +13,29 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "beneficios")
+@Table(name = "beneficios_catalogo")
 public class Beneficios {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "funcionario_id", nullable = false)
-    private Funcionario funcionario;
+    private String nomeBeneficio; // ex: Unimed Participativo, Convênio Farmácia DrogaVen
 
-    private String beneficios;
+    @Enumerated(EnumType.STRING)
+    private TipoBeneficio tipo;
 
-    private BigDecimal valorFuncionario;
+    @Enumerated(EnumType.STRING)
+    private ModalidadeCobranca modalidadeCobranca;
 
-    private BigDecimal valorFamilia;
+    private BigDecimal valorFuncionario; // Valor fixo (se houver)
 
-    private String descontos;
+    private BigDecimal valorFamilia; // Valor por dependente (se houver)
 
-    private BigDecimal valorDesconto;
+    private BigDecimal percentualCoparticipacao; // Ex: 20% sobre consulta (se aplicável)
+
+    private String observacoes;
+
+    @Builder.Default
+    private Boolean ativo = true;
 }

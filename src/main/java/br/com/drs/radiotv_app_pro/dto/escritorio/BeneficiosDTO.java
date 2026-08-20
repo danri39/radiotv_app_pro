@@ -1,9 +1,8 @@
 package br.com.drs.radiotv_app_pro.dto.escritorio;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import br.com.drs.radiotv_app_pro.model.enuns.ModalidadeCobranca;
+import br.com.drs.radiotv_app_pro.model.enuns.TipoBeneficio;
+import lombok.*;
 
 import java.math.BigDecimal;
 
@@ -11,19 +10,25 @@ import java.math.BigDecimal;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class BeneficiosDTO {
 
     private Long id;
 
-    private Long funcionarioId;
+    private String nomeBeneficio;
 
-    private String beneficios;
+    private TipoBeneficio tipo;
+
+    private ModalidadeCobranca modalidadeCobranca;
 
     private BigDecimal valorFuncionario;
 
     private BigDecimal valorFamilia;
 
-    private String descontos;
+    private BigDecimal percentualCoparticipacao; 
 
-    private BigDecimal valorDesconto;
+    private String observacoes;
+
+    @Builder.Default
+    private Boolean ativo = true;
 }

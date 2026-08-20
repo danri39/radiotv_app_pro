@@ -2,19 +2,29 @@ package br.com.drs.radiotv_app_pro.service.escritorio;
 
 import br.com.drs.radiotv_app_pro.dto.escritorio.FolhaPagamentoDTO;
 import br.com.drs.radiotv_app_pro.mapper.escritorio.FolhaPagamentoMapper;
-import br.com.drs.radiotv_app_pro.model.escritorio.Beneficios;
 import br.com.drs.radiotv_app_pro.model.escritorio.FolhaPagamento;
 import br.com.drs.radiotv_app_pro.model.escritorio.Funcionario;
-import br.com.drs.radiotv_app_pro.repository.escritorio.BeneficiosRepository;
+import br.com.drs.radiotv_app_pro.model.escritorio.FuncionarioBeneficio;
 import br.com.drs.radiotv_app_pro.repository.escritorio.FolhaPagamentoRepository;
+import br.com.drs.radiotv_app_pro.repository.escritorio.FuncionarioBeneficioRepository;
 import br.com.drs.radiotv_app_pro.repository.escritorio.FuncionarioRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,8 +32,11 @@ public class FolhaPagamentoService {
 
     private final FolhaPagamentoRepository repository;
     private final FuncionarioRepository funcionarioRepository;
-    private final BeneficiosRepository beneficiosRepository;
+    private final FuncionarioBeneficioRepository funcionarioBeneficioRepository;
     private final FolhaPagamentoMapper mapper;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Transactional
     public FolhaPagamentoDTO calcularFolha(FolhaPagamentoDTO dto) {
@@ -31,39 +44,156 @@ public class FolhaPagamentoService {
                 .orElseThrow(() -> new IllegalArgumentException(STR."Funcionário não localizado com ID: \{dto.getFuncionarioId()}"));
 
         if (funcionario.getSalario() == null || funcionario.getSalario().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("O funcionário selecionado não possui um salário base válido cadastrado no perfil.");
+            throw new IllegalArgumentException("O funcionário selecionado não possui um salário base válido cadastrado.");
         }
 
-        repository.findByFuncionarioIdAndMesAno(dto.getFuncionarioId(), dto.getMesAno()).ifPresent(f -> {
-            throw new IllegalStateException(STR."A folha de pagamento para este funcionário referente ao período \{dto.getMesAno()} já foi gerada.");
-        });
+        Optional<FolhaPagamento> folhaExistente = repository.findByFuncionarioIdAndMesAno(dto.getFuncionarioId(), dto.getMesAno());
 
-        BigDecimal bruto = funcionario.getSalario();
+        FolhaPagamento folha = folhaExistente.orElseGet(() -> FolhaPagamento.builder()
+                .funcionario(funcionario)
+                .mesAno(dto.getMesAno())
+                .build());
 
-        BigDecimal inss = calcularInss(bruto);
-        BigDecimal irrf = calcularIrrf(bruto.subtract(inss)); // Base de cálculo do IRRF é o Bruto menos o INSS
+        preencherDadosCalculo(folha, funcionario, dto.getMesAno());
 
-        List<Beneficios> beneficiosDoFuncionario = beneficiosRepository.findByFuncionarioId(funcionario.getId());
-        BigDecimal descontosBeneficios = beneficiosDoFuncionario.stream()
-                .map(b -> b.getValorFuncionario().add(b.getValorFamilia()).add(b.getValorDesconto()))
+        FolhaPagamento salva = repository.save(folha);
+        exportarArquivoSalariosTxt(dto.getMesAno());
+        return mapper.toDTO(salva);
+    }
+
+    @Transactional
+    public List<FolhaPagamentoDTO> processarFolhaLote(String mesAno) {
+        List<Funcionario> funcionariosAtivos = funcionarioRepository.findAll().stream()
+                .filter(f -> f.getAtivo() != null && f.getAtivo() && f.getSalario() != null && f.getSalario().compareTo(BigDecimal.ZERO) > 0)
+                .toList();
+
+        List<FolhaPagamentoDTO> folhasProcessadas = new ArrayList<>();
+
+        for (Funcionario f : funcionariosAtivos) {
+            Optional<FolhaPagamento> folhaExistente = repository.findByFuncionarioIdAndMesAno(f.getId(), mesAno);
+            FolhaPagamento folha = folhaExistente.orElseGet(() -> FolhaPagamento.builder()
+                    .funcionario(f)
+                    .mesAno(mesAno)
+                    .build());
+
+            preencherDadosCalculo(folha, f, mesAno);
+            folhasProcessadas.add(mapper.toDTO(repository.save(folha)));
+        }
+
+        exportarArquivoSalariosTxt(mesAno);
+        return folhasProcessadas;
+    }
+
+    private void preencherDadosCalculo(FolhaPagamento folha, Funcionario funcionario, String mesAno) {
+        BigDecimal salarioBase = funcionario.getSalario();
+        BigDecimal comissao = buscarComissaoAutomatica(funcionario, mesAno);
+
+        // Remuneração Bruta Total = Salário Base + Comissões
+        BigDecimal totalBruto = salarioBase.add(comissao);
+
+        // Tributos calculados sobre a Remuneração Bruta
+        BigDecimal inss = calcularInss(totalBruto);
+        BigDecimal irrf = calcularIrrf(totalBruto.subtract(inss));
+
+        // Dedução dos Benefícios Ativos do Funcionário
+        List<FuncionarioBeneficio> beneficiosAtivos = funcionarioBeneficioRepository.findByFuncionarioIdAndAtivoTrue(funcionario.getId());
+        BigDecimal descontosBeneficios = beneficiosAtivos.stream()
+                .map(fb -> fb.getValorTotalDesconto() != null ? fb.getValorTotalDesconto() : BigDecimal.ZERO)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         BigDecimal totalDescontos = inss.add(irrf).add(descontosBeneficios);
-        BigDecimal liquido = bruto.subtract(totalDescontos);
+        BigDecimal liquido = totalBruto.subtract(totalDescontos);
 
-        FolhaPagamento novaFolha = FolhaPagamento.builder()
-                .funcionario(funcionario)
-                .mesAno(dto.getMesAno())
-                .salarioBruto(bruto)
-                .descontoInss(inss)
-                .descontoIrrf(irrf)
-                .descontoBeneficios(descontosBeneficios)
-                .totalDescontos(totalDescontos)
-                .salarioLiquido(liquido)
-                .fechada(true) // Entra gerada e fechada para o mês
-                .build();
+        folha.setSalarioBruto(totalBruto);
+        folha.setValorComissao(comissao);
+        folha.setDescontoInss(inss);
+        folha.setDescontoIrrf(irrf);
+        folha.setDescontoBeneficios(descontosBeneficios);
+        folha.setTotalDescontos(totalDescontos);
+        folha.setSalarioLiquido(liquido);
+        folha.setFechada(true);
+    }
 
-        return mapper.toDTO(repository.save(novaFolha));
+    private BigDecimal buscarComissaoAutomatica(Funcionario funcionario, String mesAno) {
+        if (funcionario.getChaveUsuario() == null || funcionario.getChaveUsuario().isBlank()) {
+            return BigDecimal.ZERO;
+        }
+
+        try {
+            String[] partes = mesAno.split("/");
+            int mes = Integer.parseInt(partes[0]);
+            int ano = Integer.parseInt(partes[1]);
+
+            // Consulta direta na tabela comissao
+            String sql = """
+                SELECT COALESCE(SUM(valor_comissao_vendedor), 0)
+                FROM comissao
+                WHERE chave_usuario = :chave
+                  AND MONTH(data_pagamento_real) = :mes
+                  AND YEAR(data_pagamento_real) = :ano
+                  AND (paga_vendedor = 1 OR paga_vendedor = true)
+            """;
+
+            Query query = entityManager.createNativeQuery(sql);
+            query.setParameter("chave", funcionario.getChaveUsuario());
+            query.setParameter("mes", mes);
+            query.setParameter("ano", ano);
+
+            Object resultado = query.getSingleResult();
+            if (resultado instanceof Number num) {
+                return BigDecimal.valueOf(num.doubleValue()).setScale(2, RoundingMode.HALF_UP);
+            }
+            return BigDecimal.ZERO;
+        } catch (Exception e) {
+            System.err.println(STR."Erro ao buscar comissões da tabela comissao: \{e.getMessage()}");
+            return BigDecimal.ZERO;
+        }
+    }
+
+    public void exportarArquivoSalariosTxt(String mesAno) {
+        List<FolhaPagamento> folhas = repository.findAll().stream()
+                .filter(f -> f.getMesAno().equals(mesAno))
+                .toList();
+
+        if (folhas.isEmpty()) return;
+
+        try {
+            File pasta = new File("C:\\RadioTV\\Arquivos");
+            if (!pasta.exists()) {
+                pasta.mkdirs();
+            }
+
+            File arquivo = new File(pasta, "salarios.txt");
+            try (PrintWriter writer = new PrintWriter(new FileWriter(arquivo, false))) {
+                writer.println("=========================================================================================================");
+                writer.println("RELAÇÃO DE PAGAMENTO DE SALÁRIOS - RADIOTV APP PRO");
+                writer.println(STR."COMPETÊNCIA: \{mesAno} | GERADO EM: \{LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"))}");
+                writer.println("=========================================================================================================");
+                writer.printf("%-25s | %-14s | %-12s | %-8s | %-12s | %-15s%n", "FUNCIONÁRIO", "CPF", "COMISSÃO", "AGÊNCIA", "CONTA", "VALOR LÍQUIDO");
+                writer.println("---------------------------------------------------------------------------------------------------------");
+
+                BigDecimal totalLiquidoGeral = BigDecimal.ZERO;
+
+                for (FolhaPagamento f : folhas) {
+                    Funcionario func = f.getFuncionario();
+                    writer.printf("%-25s | %-14s | R$ %9.2f | %-8s | %-12s | R$ %12.2f%n",
+                            func.getNome(),
+                            func.getCpf() != null ? func.getCpf() : "N/I",
+                            f.getValorComissao() != null ? f.getValorComissao() : BigDecimal.ZERO,
+                            func.getAgencia() != null ? func.getAgencia() : "N/I",
+                            func.getConta() != null ? func.getConta() : "N/I",
+                            f.getSalarioLiquido()
+                    );
+                    totalLiquidoGeral = totalLiquidoGeral.add(f.getSalarioLiquido());
+                }
+
+                writer.println("=========================================================================================================");
+                writer.printf("TOTAL GERAL DA FOLHA: R$ %.2f%n", totalLiquidoGeral);
+                writer.println("=========================================================================================================");
+            }
+        } catch (Exception e) {
+            System.err.println(STR."Erro ao gerar arquivo salarios.txt: \{e.getMessage()}");
+        }
     }
 
     public List<FolhaPagamentoDTO> listarTodas() {
@@ -77,7 +207,7 @@ public class FolhaPagamentoService {
     @Transactional
     public void deletar(Long id) {
         if (!repository.existsById(id)) {
-            throw new RuntimeException("Folha de pagamento não encontrada para exclusão.");
+            throw new RuntimeException("Folha de pagamento não encontrada.");
         }
         repository.deleteById(id);
     }
@@ -95,7 +225,7 @@ public class FolhaPagamentoService {
         } else if (sal <= 7786.02) {
             desconto = (1518.00 * 0.075) + ((2793.88 - 1518.00) * 0.09) + ((4190.83 - 2793.88) * 0.12) + ((sal - 4190.83) * 0.14);
         } else {
-            desconto = 908.85; // Teto máximo de recolhimento do INSS
+            desconto = 908.85;
         }
         return BigDecimal.valueOf(desconto).setScale(2, RoundingMode.HALF_UP);
     }

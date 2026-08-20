@@ -25,6 +25,8 @@ public class FolhaPagamentoDTO {
 
     private BigDecimal descontoIrrf;
 
+    private BigDecimal valorComissao;
+
     private BigDecimal descontoBeneficios;
 
     private BigDecimal totalDescontos;

@@ -35,6 +35,10 @@ public class FolhaPagamento {
     private BigDecimal descontoIrrf;
 
     @Column(nullable = false)
+    @Builder.Default
+    private BigDecimal valorComissao = BigDecimal.ZERO;
+
+    @Column(nullable = false)
     private BigDecimal descontoBeneficios; // Soma de valorFuncionario + valorFamilia + valorDesconto da tabela de benefícios
 
     @Column(nullable = false)
