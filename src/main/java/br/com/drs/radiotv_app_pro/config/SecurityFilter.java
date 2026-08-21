@@ -26,30 +26,38 @@ public class SecurityFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        // 1. Recupera o token puro do cabeçalho da requisição
-        String token = recoverToken(request);
-
-        if (token != null) {
-            // 2. Extrai o e-mail usando a engrenagem nativa do seu JwtUtil
-            String email = jwtUtil.extrairEmail(token);
-
-            if (email != null) {
-                // 3. Busca os dados e permissões do Usuário no banco através do e-mail
-                UserDetails user = userDetailsService.loadUserByUsername(email);
-
-                // 4. Autentica o usuário no contexto do Spring Security
-                var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            }
+        // Se for requisição OPTIONS (Preflight do navegador), segue direto sem processar token
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            filterChain.doFilter(request, response);
+            return;
         }
 
-        // Continua o fluxo normal do Spring
+        try {
+            String token = recoverToken(request);
+
+            if (token != null) {
+                String email = jwtUtil.extrairEmail(token);
+
+                if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                    UserDetails user = userDetailsService.loadUserByUsername(email);
+
+                    if (user != null) {
+                        var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // Em caso de token expirado ou inválido, limpa o contexto para permitir rotas públicas/permitAll
+            SecurityContextHolder.clearContext();
+        }
+
         filterChain.doFilter(request, response);
     }
 
     private String recoverToken(HttpServletRequest request) {
         var authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) return null;
-        return authHeader.replace("Bearer ", "");
+        return authHeader.replace("Bearer ", "").trim();
     }
 }

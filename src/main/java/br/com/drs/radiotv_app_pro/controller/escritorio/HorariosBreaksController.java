@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/horarioBreak")
+@RequestMapping("/api/v1/horariosBreaks")
 @RequiredArgsConstructor
 public class HorariosBreaksController {
 
