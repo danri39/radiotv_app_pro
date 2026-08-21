@@ -68,6 +68,9 @@ public class Musicas {
 
     private String observacao;
 
+    @Column(nullable = false)
+    private String caminhoArquivo;
+
     @Builder.Default
     private Boolean ativo = true ;
 }

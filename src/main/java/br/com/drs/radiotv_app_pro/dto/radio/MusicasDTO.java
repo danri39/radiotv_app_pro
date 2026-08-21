@@ -48,6 +48,8 @@ public class MusicasDTO {
 
     private String observacao;
 
+    private String caminhoArquivo;
+
     @Builder.Default
     private Boolean ativo = true ;
 }

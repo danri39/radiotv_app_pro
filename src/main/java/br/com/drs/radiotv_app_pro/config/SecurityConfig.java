@@ -71,6 +71,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/funcionarioBeneficio/**").permitAll()
                         .requestMatchers("/api/v1/gerencial/**").permitAll()
                         .requestMatchers("/api/v1/roteiro/**").permitAll()
+                        .requestMatchers("/api/v1/music/**").permitAll()
+                        .requestMatchers("/api/v1/musicas/**").permitAll()
+                        .requestMatchers("/api/v1/pastas/**").permitAll()
 
                         // 4. Regras administrativas / restritas
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
