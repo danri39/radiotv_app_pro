@@ -41,6 +41,4 @@ public class RegistroMusicalService {
         RegistroMusical salvo = repository.save(entity);
         return mapper.toDto(salvo);
     }
-
-
 }
