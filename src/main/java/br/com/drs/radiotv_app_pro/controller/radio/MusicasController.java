@@ -19,6 +19,24 @@ public class MusicasController {
 
     private final MusicasService service;
 
+    @PostMapping("/escanear")
+    public ResponseEntity<?> escanearEGerarTxt() {
+        try {
+            // Chama a varredura e a gravação padronizada no Service
+            service.escanearPastaESincronizarTxt();
+            return ResponseEntity.ok().body("Músicas escaneadas e arquivo Musicas.txt gerado com sucesso.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body(STR."Erro ao escanear pasta: \{e.getMessage()}");
+        }
+    }
+
+    @PostMapping("/restaurar")
+    public ResponseEntity<Void> restaurarDoTxt() {
+        service.restaurarBancoDoArquivoTxt();
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping
     public ResponseEntity<MusicasDTO> salvar(@Valid @RequestBody MusicasDTO dto) {
         MusicasDTO musicaSalva = service.salvar(dto);
@@ -48,12 +66,12 @@ public class MusicasController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<MusicasDTO> atualizar(@PathVariable("id") Long id, @RequestBody MusicasDTO dto) {
+    public ResponseEntity<MusicasDTO> atualizar(@PathVariable Long id, @RequestBody MusicasDTO dto) {
         return ResponseEntity.ok(service.atualizar(id, dto));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> inativar(@PathVariable("id") Long id) {
+    public ResponseEntity<Void> inativar(@PathVariable Long id) {
         service.inativar(id);
         return ResponseEntity.noContent().build();
     }
