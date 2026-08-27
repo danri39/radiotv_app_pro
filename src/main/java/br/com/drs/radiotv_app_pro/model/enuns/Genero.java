@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum EstiloMusica {
+public enum Genero {
 
     POP,
     ROCK,
