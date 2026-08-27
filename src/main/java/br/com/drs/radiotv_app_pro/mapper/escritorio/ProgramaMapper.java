@@ -10,12 +10,27 @@ import org.mapstruct.MappingTarget;
 public interface ProgramaMapper {
 
     @Mapping(source = "diasSemana", target = "diasSemana")
+    @Mapping(source = "nacional", target = "nacional")
+    @Mapping(source = "feriados", target = "feriados")
+    @Mapping(source = "breaks", target = "breaks")
+    @Mapping(source = "breaksProprios", target = "breaksProprios")
+    @Mapping(source = "ativo", target = "ativo")
     ProgramaDTO toDTO(Programa programa);
 
     @Mapping(source = "diasSemana", target = "diasSemana")
+    @Mapping(source = "nacional", target = "nacional")
+    @Mapping(source = "feriados", target = "feriados")
+    @Mapping(source = "breaks", target = "breaks")
+    @Mapping(source = "breaksProprios", target = "breaksProprios")
+    @Mapping(source = "ativo", target = "ativo")
     Programa toEntity(ProgramaDTO dto);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(source = "diasSemana", target = "diasSemana")
+    @Mapping(source = "nacional", target = "nacional")
+    @Mapping(source = "feriados", target = "feriados")
+    @Mapping(source = "breaks", target = "breaks")
+    @Mapping(source = "breaksProprios", target = "breaksProprios")
+    @Mapping(source = "ativo", target = "ativo")
     void updateEntityFromDto(ProgramaDTO dto, @MappingTarget Programa programaExistente);
 }

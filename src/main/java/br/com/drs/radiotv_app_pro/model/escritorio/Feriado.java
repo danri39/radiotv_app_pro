@@ -21,6 +21,6 @@ public class Feriado {
 
     private String descricao;
 
-    @JsonFormat(pattern = "dd/MM/yyyy")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dataFeriado;
 }

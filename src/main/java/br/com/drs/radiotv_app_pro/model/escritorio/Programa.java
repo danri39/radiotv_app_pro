@@ -30,14 +30,16 @@ public class Programa {
     @JsonFormat(pattern = "HH:mm:ss")
     private LocalTime horaFinal;
 
-    @ElementCollection(targetClass = DiasSemana.class)
-    @Enumerated(EnumType.STRING)
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "programa_semana", joinColumns = @JoinColumn(name = "programa_id"))
+    @Enumerated(EnumType.STRING)
     @Column(name = "dia_semana")
     private List<DiasSemana> diasSemana;
 
     @Enumerated(EnumType.STRING)
     private TipoPrograma tipoPrograma;
+
+    private Boolean nacional;
 
     private Boolean feriados;
 

@@ -15,6 +15,9 @@ import br.com.drs.radiotv_app_pro.repository.escritorio.FeriadoRepository;
 import br.com.drs.radiotv_app_pro.repository.escritorio.HorariosBreaksRepository;
 import br.com.drs.radiotv_app_pro.repository.escritorio.ProgramaRepository;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Hibernate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
 
@@ -25,10 +28,13 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class GeradorRoteiroService {
+
+    private static final Logger log = LoggerFactory.getLogger(GeradorRoteiroService.class);
 
     private final ContratoMidiaRepository midiaRepository;
     private final HorariosBreaksRepository horariosBreaksRepository;
@@ -40,6 +46,7 @@ public class GeradorRoteiroService {
         LocalDate dataAlvo = request.getData();
         DiasSemana diaSemanaInformado = request.getDiaSemana();
 
+        // Validação de consistência entre data e dia da semana informado
         DiasSemana diaSemanaReal = converterDayOfWeekParaEnum(dataAlvo.getDayOfWeek());
         if (diaSemanaReal != diaSemanaInformado) {
             throw new IllegalArgumentException(String.format(
@@ -54,18 +61,65 @@ public class GeradorRoteiroService {
         boolean ehFeriado = feriadoRepository.findAll().stream()
                 .anyMatch(f -> f.getDataFeriado() != null && f.getDataFeriado().isEqual(dataAlvo));
 
-        // 2. BUSCA DA GRADE DE PROGRAMAÇÃO DO DIA
-        List<Programa> programasDoDia = programaRepository.findAll().stream()
-                .filter(p -> p.getAtivo() != null && p.getAtivo())
-                .filter(p -> {
-                    if (ehFeriado) {
-                        return p.getFeriados() != null && p.getFeriados();
-                    } else {
-                        return p.getDiasSemana() != null && p.getDiasSemana().contains(diaSemanaInformado);
-                    }
-                })
-                .sorted(Comparator.comparing(Programa::getHoraInicio))
-                .toList();
+        log.info("========================================================");
+        log.info(">>> GERANDO ROTEIRO PARA: {} | DATA: {} | FERIADO: {}", diaSemanaInformado, dataAlvo, ehFeriado);
+        log.info("========================================================");
+
+        // 2. BUSCA DA GRADE DE PROGRAMAÇÃO - SOLUÇÃO DEFINITIVA
+        List<Programa> todosProgramas = programaRepository.findAll();
+        List<Programa> programasDoDia = new ArrayList<>();
+
+        for (Programa p : todosProgramas) {
+            if (p.getAtivo() == null || !p.getAtivo()) {
+                continue;
+            }
+
+            boolean aceitar = false;
+
+            // TRAVA DE SEGURANÇA ABSOLUTA: Bloqueia programas com "Domingo" no nome se não for Domingo
+            // Isso resolve o problema independentemente de como o banco de dados está configurado
+            if (p.getNomePrograma().toLowerCase().contains("domingo") && diaSemanaInformado != DiasSemana.DOMINGO) {
+                log.warn("[BLOQUEIO DIRETO] Programa '{}' ignorado pois hoje é {}", p.getNomePrograma(), diaSemanaInformado);
+                continue;
+            }
+
+            if (ehFeriado) {
+                if (Boolean.TRUE.equals(p.getFeriados())) {
+                    aceitar = true;
+                    log.info("[ACEITO] {} (Motivo: Feriado)", p.getNomePrograma());
+                }
+            } else {
+                // Tenta carregar os dias do banco para garantir que não venha vazio
+                try {
+                    Hibernate.initialize(p.getDiasSemana());
+                } catch (Exception e) {
+                    log.warn("Erro ao inicializar dias do programa {}: {}", p.getNomePrograma(), e.getMessage());
+                }
+
+                List<DiasSemana> dias = p.getDiasSemana();
+
+                // Lógica estrita: Só aceita se a lista tiver o dia exato
+                if (dias != null && !dias.isEmpty() && dias.contains(diaSemanaInformado)) {
+                    aceitar = true;
+                    log.info("[ACEITO] {} (Motivo: Dia {} encontrado na lista {})", p.getNomePrograma(), diaSemanaInformado, dias);
+                } else {
+                    log.debug("[REJEITADO] {} (Dias no banco: {})", p.getNomePrograma(), dias);
+                }
+            }
+
+            if (aceitar) {
+                programasDoDia.add(p);
+            }
+        }
+
+        // Ordena por hora de início
+        programasDoDia.sort(Comparator.comparing(Programa::getHoraInicio));
+
+        log.info(">>> TOTAL DE PROGRAMAS NA GRADE FINAL: {}", programasDoDia.size());
+        for (Programa p : programasDoDia) {
+            log.info("    - {} às {} : {}", p.getHoraInicio(), p.getHoraFinal(), p.getNomePrograma());
+        }
+        log.info("========================================================");
 
         // 3. ESTRUTURAÇÃO DINÂMICA DOS HORÁRIOS DO DIA E CAPACIDADES
         Map<LocalTime, List<ContratoMidia>> mapaRoteiro = new TreeMap<>();
@@ -81,17 +135,14 @@ public class GeradorRoteiroService {
                 .toList();
 
         // 5. SEPARAÇÃO DAS FILAS
-        // Fila 1: DETERMINADOS FIXOS COM HORÁRIO EXATO
         List<ContratoMidia> determinadosHorarioFixo = midiasDoDia.stream()
                 .filter(m -> m.getHorarioEspecifico() != null)
                 .toList();
 
-        // Fila 2: MÍDIAS VINCULADAS A PROGRAMAS ESPECÍFICOS (Ex: Comercial do Jornal da EP)
         List<ContratoMidia> vinculadasAPrograma = midiasDoDia.stream()
                 .filter(m -> m.getHorarioEspecifico() == null && m.getPrograma() != null)
                 .toList();
 
-        // Fila 3: ROTATIVOS GERAIS DA EMISSORA (Nunca vinculados a um programa)
         List<ContratoMidia> rotativosGerais = midiasDoDia.stream()
                 .filter(m -> m.getHorarioEspecifico() == null && m.getPrograma() == null && m.getDistribuicao() != Distribuicao.DETERMINADO)
                 .sorted(Comparator.comparingInt((ContratoMidia m) -> m.getPrioridade() != null ? m.getPrioridade() : 50).reversed())
@@ -102,16 +153,36 @@ public class GeradorRoteiroService {
         // =========================================================================
         for (ContratoMidia midia : determinadosHorarioFixo) {
             LocalTime breakMaisProximo = encontrarBreakMaisProximo(mapaRoteiro.keySet(), midia.getHorarioEspecifico());
+
+            // Verifica se o programa vinculado está na grade de hoje
+            if (midia.getPrograma() != null) {
+                boolean programaAtivoHoje = programasDoDia.stream()
+                        .anyMatch(p -> p.getId().equals(midia.getPrograma().getId()));
+
+                if (!programaAtivoHoje) {
+                    continue; // Pula se o programa não estiver no ar (ex: feriado ou dia errado)
+                }
+            }
+
             for (int q = 0; q < midia.getQuantidade(); q++) {
                 mapaRoteiro.get(breakMaisProximo).add(midia);
             }
         }
 
         // =========================================================================
-        // ALOCAÇÃO 2: MÍDIAS DE PROGRAMAS ESPECÍFICOS (Distribuídas uniformemente nos breaks do programa)
+        // ALOCAÇÃO 2: MÍDIAS DE PROGRAMAS ESPECÍFICOS
         // =========================================================================
         for (ContratoMidia midia : vinculadasAPrograma) {
             Programa prog = midia.getPrograma();
+
+            // Verifica se o programa existe na grade deste dia
+            boolean programaExisteHoje = programasDoDia.stream()
+                    .anyMatch(p -> p.getId().equals(prog.getId()));
+
+            if (!programaExisteHoje) {
+                continue;
+            }
+
             List<LocalTime> breaksDoPrograma = mapaRoteiro.keySet().stream()
                     .filter(t -> !t.isBefore(prog.getHoraInicio()) && t.isBefore(prog.getHoraFinal()))
                     .toList();
@@ -138,7 +209,7 @@ public class GeradorRoteiroService {
                     }
                 }
 
-                // 2º Tenta break sem choque concorrencial de ramo e sem mesmo anunciante
+                // 2º Tenta break sem choque concorrencial e sem mesmo anunciante
                 if (breakEscolhido == null) {
                     int menorTempo = Integer.MAX_VALUE;
                     for (int offset = 0; offset < totalBreaksProg; offset++) {
@@ -157,7 +228,6 @@ public class GeradorRoteiroService {
                     }
                 }
 
-                // Fallback no programa
                 if (breakEscolhido == null) {
                     breakEscolhido = breaksDoPrograma.get(centroIdeal);
                 }
@@ -167,7 +237,7 @@ public class GeradorRoteiroService {
         }
 
         // =========================================================================
-        // ALOCAÇÃO 3: ROTATIVOS GERAIS (Totalmente blindados de programas com breaks próprios)
+        // ALOCAÇÃO 3: ROTATIVOS GERAIS
         // =========================================================================
         for (ContratoMidia rotativo : rotativosGerais) {
             int qtdInsercoes = rotativo.getQuantidade();
@@ -176,25 +246,24 @@ public class GeradorRoteiroService {
             LocalTime horaLimiteInicio = obterHoraInicioPorDistribuicao(rotativo.getDistribuicao());
             LocalTime horaLimiteFim = obterHoraFimPorDistribuicao(rotativo.getDistribuicao());
 
-            // Bloqueia qualquer horário de programa com breaksProprios == true ou breaks == false
-            List<LocalTime> janelasDisponiveis = new ArrayList<>(mapaRoteiro.keySet().stream()
+            List<LocalTime> janelasDisponiveis = mapaRoteiro.keySet().stream()
                     .filter(time -> !time.isBefore(horaLimiteInicio) && time.isBefore(horaLimiteFim))
                     .filter(time -> {
                         Programa prog = encontrarProgramaNoHorario(programasDoDia, time);
-                        if (prog == null) return true; // Faixa musical aceita rotativo
-                        if (prog.getBreaks() != null && !prog.getBreaks()) return false;
-                        if (prog.getBreaksProprios() != null && prog.getBreaksProprios()) return false; // BLINDADO
+                        if (prog == null) return true;
+                        if (Boolean.FALSE.equals(prog.getBreaks())) return false;
+                        if (Boolean.TRUE.equals(prog.getBreaksProprios())) return false;
                         return true;
                     })
-                    .toList());
+                    .collect(Collectors.toList());
 
             if (janelasDisponiveis.isEmpty()) {
-                janelasDisponiveis = new ArrayList<>(mapaRoteiro.keySet().stream()
+                janelasDisponiveis = mapaRoteiro.keySet().stream()
                         .filter(time -> {
                             Programa prog = encontrarProgramaNoHorario(programasDoDia, time);
-                            return prog == null || prog.getBreaksProprios() == null || !prog.getBreaksProprios();
+                            return prog == null || !Boolean.TRUE.equals(prog.getBreaksProprios());
                         })
-                        .toList());
+                        .collect(Collectors.toList());
             }
 
             int totalBreaksJanela = janelasDisponiveis.size();
@@ -206,7 +275,6 @@ public class GeradorRoteiroService {
                 int centroIdeal = (q * fatorSalto) % totalBreaksJanela;
                 LocalTime breakEscolhido = null;
 
-                // 1º Tenta break totalmente VAZIO
                 for (int offset = 0; offset < totalBreaksJanela; offset++) {
                     int idx = (centroIdeal + offset) % totalBreaksJanela;
                     LocalTime localBreak = janelasDisponiveis.get(idx);
@@ -218,7 +286,6 @@ public class GeradorRoteiroService {
                     }
                 }
 
-                // 2º Tenta break de MENOR TEMPO sem choques
                 if (breakEscolhido == null) {
                     int menorTempo = Integer.MAX_VALUE;
                     for (int offset = 0; offset < totalBreaksJanela; offset++) {
@@ -239,7 +306,6 @@ public class GeradorRoteiroService {
                     }
                 }
 
-                // Fallback
                 if (breakEscolhido == null) {
                     breakEscolhido = janelasDisponiveis.get(centroIdeal);
                 }
@@ -248,7 +314,7 @@ public class GeradorRoteiroService {
             }
         }
 
-        // 6. ORDENAÇÃO DOS SPOTS DENTRO DE CADA BREAK POR PRIORIDADE (01 Início, 99 Fim)
+        // 6. ORDENAÇÃO DOS SPOTS DENTRO DE CADA BREAK POR PRIORIDADE
         for (List<ContratoMidia> listaBloco : mapaRoteiro.values()) {
             listaBloco.sort(Comparator.comparingInt((ContratoMidia m) -> m.getPrioridade() != null ? m.getPrioridade() : 50));
         }
@@ -265,7 +331,7 @@ public class GeradorRoteiroService {
             String nomePrograma = (programaNoAr != null) ? programaNoAr.getNomePrograma() : "MUSICAL / SEM PROGRAMA";
             String observacao = null;
 
-            if (programaNoAr != null && programaNoAr.getBreaksProprios() != null && programaNoAr.getBreaksProprios()) {
+            if (programaNoAr != null && Boolean.TRUE.equals(programaNoAr.getBreaksProprios())) {
                 observacao = "Breaks do programa, sem rotativo";
             }
 

@@ -1,44 +1,49 @@
 package br.com.drs.radiotv_app_pro.controller.escritorio;
 
-import br.com.drs.radiotv_app_pro.dto.escritorio.FeriadoDTO;
 import br.com.drs.radiotv_app_pro.model.escritorio.Feriado;
-import br.com.drs.radiotv_app_pro.service.escritorio.FeriadoService;
-import lombok.RequiredArgsConstructor;
+import br.com.drs.radiotv_app_pro.repository.escritorio.FeriadoRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/feriado")
-@RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class FeriadoController {
 
-    private final FeriadoService service;
-
-    @PostMapping
-    public ResponseEntity<FeriadoDTO> salvar(@RequestBody FeriadoDTO dto) {
-        return ResponseEntity.ok(service.salvar(dto));
-    }
+    @Autowired
+    private FeriadoRepository repository;
 
     @GetMapping
-    public List<Feriado> listar() {
-        return service.listar();
+    public List<Feriado> listarTodos() {
+        return repository.findAll();
     }
 
-    @GetMapping("/{id}")
-    public Optional<Feriado> buscar(@PathVariable Long id) {
-        return service.buscarPorId(id);
+    @PostMapping
+    public Feriado cadastrar(@RequestBody Feriado feriado) {
+        return repository.save(feriado);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<FeriadoDTO> atualizar(@PathVariable Long id, @RequestBody FeriadoDTO dto) {
-        return ResponseEntity.ok(service.atualizar(id, dto));
+    public ResponseEntity<Feriado> atualizar(@PathVariable Long id, @RequestBody Feriado dadosAtualizados) {
+        return repository.findById(id)
+                .map(feriado -> {
+                    feriado.setDescricao(dadosAtualizados.getDescricao());
+                    feriado.setDataFeriado(dadosAtualizados.getDataFeriado()); // Atualiza a data explicitamente
+                    Feriado atualizado = repository.save(feriado);
+                    return ResponseEntity.ok(atualizado);
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> remover(@PathVariable Long id) {
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+        if (repository.existsById(id)) {
+            repository.deleteById(id);
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
     }
 }
