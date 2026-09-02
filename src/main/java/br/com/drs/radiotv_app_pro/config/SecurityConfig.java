@@ -71,12 +71,13 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/funcionarioBeneficio/**").permitAll()
                         .requestMatchers("/api/v1/gerencial/**").permitAll()
                         .requestMatchers("/api/v1/roteiro/**").permitAll()
-                        .requestMatchers("/api/v1/music/**").permitAll()
+                        .requestMatchers("/api/v1/downloader/**").permitAll()
                         .requestMatchers("/api/v1/musicas/**").permitAll()
                         .requestMatchers("/api/v1/pastas/**").permitAll()
                         .requestMatchers("/api/v1/registroComercial/**").permitAll()
                         .requestMatchers("/api/v1/registroMusical/**").permitAll()
                         .requestMatchers("/api/v1/roteiroMusical/**").permitAll()
+                        .requestMatchers("/api/v1/musicas/importacao/**").permitAll()
 
                         // 4. Regras administrativas / restritas
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
