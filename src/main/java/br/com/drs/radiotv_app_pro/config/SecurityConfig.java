@@ -29,14 +29,18 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-                // 1. ATIVA O FILTRO DE CORS CONFIGURADO ABAIXO E DETONA O ERRO DO CONSOLE
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
+                        // 1. Liberação global de requisições de preflight do CORS
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
+                        // 2. Rotas públicas e de autenticação
                         .requestMatchers(HttpMethod.POST, "/api/v1/usuario/public/**").permitAll()
                         .requestMatchers("/api/v1/usuario/public/**").permitAll()
+
+                        // 3. Rotas dos Módulos do Sistema
                         .requestMatchers("/api/v1/usuario/**").permitAll()
                         .requestMatchers("/api/v1/funcionario/**").permitAll()
                         .requestMatchers("/api/v1/familia/**").permitAll()
@@ -46,11 +50,36 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/agencia/**").permitAll()
                         .requestMatchers("/api/v1/contrato/**").permitAll()
                         .requestMatchers("/api/v1/contratoMidia/**").permitAll()
-                        .requestMatchers("/api/v1/contratoPagamento/**").permitAll()
+                        .requestMatchers("/api/v1/faturamento/**").permitAll()
                         .requestMatchers("/api/v1/programa/**").permitAll()
                         .requestMatchers("/api/v1/ramoAtividade/**").permitAll()
                         .requestMatchers("/api/v1/configEscritorio/**").permitAll()
+                        .requestMatchers("/api/v1/pontos/**").permitAll()
+                        .requestMatchers("/api/v1/beneficio/**").permitAll()
+                        .requestMatchers("/api/v1/produto/**").permitAll()
+                        .requestMatchers("/api/v1/compras/**").permitAll()
+                        .requestMatchers("/api/v1/contasBancaria/**").permitAll()
+                        .requestMatchers("/api/v1/feriado/**").permitAll()
+                        .requestMatchers("/api/v1/ferias/**").permitAll()
+                        .requestMatchers("/api/v1/folhasPagamento/**").permitAll()
+                        .requestMatchers("/api/v1/horariosBreaks/**").permitAll()
+                        .requestMatchers("/api/v1/pagamento/**").permitAll()
+                        .requestMatchers("/api/v1/administracao/**").permitAll()
+                        .requestMatchers("/api/v1/comissao/**").permitAll()
+                        .requestMatchers("/api/v1/veiculos/**").permitAll()
+                        .requestMatchers("/api/v1/frota/**").permitAll()
+                        .requestMatchers("/api/v1/funcionarioBeneficio/**").permitAll()
+                        .requestMatchers("/api/v1/gerencial/**").permitAll()
+                        .requestMatchers("/api/v1/roteiro/**").permitAll()
+                        .requestMatchers("/api/v1/downloader/**").permitAll()
+                        .requestMatchers("/api/v1/musicas/**").permitAll()
+                        .requestMatchers("/api/v1/pastas/**").permitAll()
+                        .requestMatchers("/api/v1/registroComercial/**").permitAll()
+                        .requestMatchers("/api/v1/registroMusical/**").permitAll()
+                        .requestMatchers("/api/v1/roteiroMusical/**").permitAll()
+                        .requestMatchers("/api/v1/musicas/importacao/**").permitAll()
 
+                        // 4. Regras administrativas / restritas
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
@@ -58,17 +87,17 @@ public class SecurityConfig {
                 .build();
     }
 
-    // 2. CONFIGURAÇÃO EXPLÍCITA DE CORS PARA O SPRING SECURITY LIBERAR O REACT (PORTA 3000)
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000")); // Origem do seu front
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Cache-Control"));
+        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setExposedHeaders(List.of("Authorization", "Content-Disposition"));
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration); // Aplica para todas as rotas da API
+        source.registerCorsConfiguration("/**", configuration);
         return source;
     }
 

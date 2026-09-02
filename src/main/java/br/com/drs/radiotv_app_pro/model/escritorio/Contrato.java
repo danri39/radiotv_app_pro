@@ -1,0 +1,74 @@
+package br.com.drs.radiotv_app_pro.model.escritorio;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Entity
+@Table(name = "contrato")
+public class Contrato {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cliente_id", nullable = false)
+    private Cliente cliente;
+
+    @Column(nullable = false, length = 8)
+    private String chaveUsuario;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "agencia_id")
+    private Agencia agencia;
+
+    @JsonFormat(pattern = "dd/MM/yyyy")
+    @Column(nullable = false)
+    private LocalDate dataInicio;
+
+    @JsonFormat(pattern = "dd/MM/yyyy")
+    @Column(nullable = false)
+    private LocalDate dataFinal;
+
+    private BigDecimal valorTotal;
+
+    private Integer quantidadeParcelas;
+
+    @JsonFormat(pattern = "dd/MM/yyyy")
+    private LocalDate dataPrimeiroPagamento;
+
+    @Builder.Default
+    private Boolean contratoBonificado = false;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "contrato", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ContratoMidia> midias = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "contrato", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Faturamento> pagamentos = new ArrayList<>();
+
+    @Builder.Default
+    private Boolean ativo = true;
+
+    public void adicionarMidia(ContratoMidia midia) {
+        midias.add(midia);
+        midia.setContrato(this);
+    }
+
+    public void adicionarPagamento(Faturamento pagamento) {
+        pagamentos.add(pagamento);
+        pagamento.setContrato(this);
+    }
+}

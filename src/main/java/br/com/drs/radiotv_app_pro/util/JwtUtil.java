@@ -1,6 +1,6 @@
 package br.com.drs.radiotv_app_pro.util;
 
-import br.com.drs.radiotv_app_pro.model.Usuario;
+import br.com.drs.radiotv_app_pro.model.escritorio.Usuario;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
